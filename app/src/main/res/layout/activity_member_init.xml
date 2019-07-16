@@ -1,0 +1,103 @@
+<?xml version="1.0" encoding="utf-8"?>
+<RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    android:orientation="vertical"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:padding="10dp">
+    <LinearLayout
+        android:orientation="vertical"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content">
+        <TextView
+            android:textSize="40dp"
+            android:gravity="center"
+            android:text="회원정보"
+            android:layout_width="match_parent"
+            android:layout_height="150dp" />
+
+        <androidx.cardview.widget.CardView
+            app:cardCornerRadius="100dp"
+            android:layout_gravity="center"
+            android:layout_width="180dp"
+            android:layout_height="170dp">
+
+            <ImageView
+                android:id="@+id/profileimg"
+                android:layout_width="match_parent"
+                android:layout_height="match_parent"
+                android:adjustViewBounds="true"
+                android:src="@mipmap/ic_launcher" />
+        </androidx.cardview.widget.CardView>
+
+        <EditText
+            android:id="@+id/edtnameINIT"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:ems="10"
+            android:inputType="textPersonName"
+            android:hint="이름" />
+
+        <EditText
+            android:id="@+id/edtphonenumINIT"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:hint="전화번호"
+            android:ems="10"
+            android:inputType="phone" />
+
+        <EditText
+            android:id="@+id/edtbirthdayINIT"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:ems="10"
+            android:hint="생년월일"
+            android:inputType="date" />
+
+        <EditText
+            android:id="@+id/editaddressINIT"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:ems="10"
+            android:hint="주소"
+            android:inputType="textPostalAddress" />
+
+        <Button
+            android:id="@+id/btncheckINIT"
+            android:text="확인"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content" />
+
+    </LinearLayout>
+
+
+    <androidx.cardview.widget.CardView
+        android:id="@+id/buttonsCardView"
+        android:visibility="gone"
+        app:cardBackgroundColor="#C4007FD4"
+        android:layout_alignParentBottom="true"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        app:cardCornerRadius="15dp"
+        android:elevation="10dp">
+        <LinearLayout
+            android:orientation="vertical"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content">
+            <Button
+                android:id="@+id/picture"
+                android:text="사진촬영"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content" />
+            <Button
+                android:id="@+id/gallery"
+                android:text="갤러리"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content" />
+        </LinearLayout>
+
+
+    </androidx.cardview.widget.CardView>
+
+
+</RelativeLayout>

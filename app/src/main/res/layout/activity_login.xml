@@ -1,0 +1,33 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:orientation="vertical" android:layout_width="match_parent"
+    android:layout_height="match_parent">
+    <TextView
+        android:textSize="60dp"
+        android:gravity="center"
+        android:text="로그인"
+        android:layout_width="match_parent"
+        android:layout_height="250dp" />
+    <EditText
+        android:id="@+id/edtsignemail"
+        android:hint="이메일"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content" />
+    <EditText
+        android:id="@+id/edtsignpasswd"
+        android:hint="비밀번호"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content" />
+
+    <Button
+        android:id="@+id/btnlogin"
+        android:text="로그인"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content" />
+    <Button
+        android:id="@+id/btnpasswdresetGO"
+        android:text="비밀번호 재설정"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content" />
+
+</LinearLayout>
