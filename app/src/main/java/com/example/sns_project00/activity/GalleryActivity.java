@@ -36,13 +36,13 @@ public class GalleryActivity extends BasicActivity {
     }
 
 
-    public  ArrayList<String> getImagesPath(Activity activity) {         //이젠 데이터가...그 나의 경로에 있는  이미지 리스트가 나와야겠죠!!
+    public ArrayList<String> getImagesPath(Activity activity) {         //이젠 데이터가...그 나의 경로에 있는  이미지 리스트가 나와야겠죠!!
         Uri uri;                                                                 //이걸 (String[] myDataset={"강아지","고양이","드래곤","치킨"};),,,, 이 코드들로 사용 할꺼다.(임시)
         ArrayList<String> listOfAllImages = new ArrayList<String>();
         Cursor cursor;
         int column_index_data;
         String PathOfImage = null;
-        String[] projection;
+        String[] projection; //핸드폰에 있는 비디오,앨범 넣을 배열
 
         Intent intent=getIntent();
         if(intent.getStringExtra("media").equals("video")){

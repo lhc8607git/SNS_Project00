@@ -114,7 +114,7 @@ public class MemberInitActivity extends BasicActivity {
                             Toast.makeText(getApplicationContext(),"권한을 허용해 주세요.",Toast.LENGTH_LONG).show();
                         }
                     }else{                                                                  //권한이 있을때
-                        myStartActivity(GalleryActivity.class);
+                        myStartActivitygalleryerror(GalleryActivity.class);
                     }
                     break;
             }
@@ -214,6 +214,14 @@ public class MemberInitActivity extends BasicActivity {
     private void myStartActivity(Class c){
         Intent intent=new Intent(this, c);  //클래스로 받는 걸로 바꿈.  <- Intent intent=new Intent(this, MainActivity.class);
         //intent.setFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP);   //뒤로가기 할때 깨끗하게
+        startActivityForResult(intent,0);  //사진 찍은 거 . 결과 받아야하니깐 startActivityForResult 사용함
+    }
+
+
+    //아.. 이거 myStartActivity 이걸로 했었는데 에러 나서 이걸로함.. 나중에 해결되면 삭제.
+    private void myStartActivitygalleryerror(Class c){
+        Intent intent=new Intent(this, c);  //클래스로 받는 걸로 바꿈.  <- Intent intent=new Intent(this, MainActivity.class);
+        intent.putExtra("media","gallery");
         startActivityForResult(intent,0);  //사진 찍은 거 . 결과 받아야하니깐 startActivityForResult 사용함
     }
 }

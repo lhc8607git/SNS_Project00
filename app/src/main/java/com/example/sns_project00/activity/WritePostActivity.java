@@ -122,7 +122,7 @@ public class WritePostActivity extends BasicActivity{
                     try{
                         InputStream stream = new FileInputStream(new File(pathList.get(pathCount)));
                         StorageMetadata metadata = new StorageMetadata.Builder().setCustomMetadata("index",""+pathCount).build();    //API에 사용 법 있음.StorageMetadata
-                        UploadTask uploadTask = mountainImagesRef.putStream(stream);
+                        UploadTask uploadTask = mountainImagesRef.putStream(stream,metadata);
                         uploadTask.addOnFailureListener(new OnFailureListener() {
                             @Override
                             public void onFailure(@NonNull Exception exception) {
@@ -136,12 +136,15 @@ public class WritePostActivity extends BasicActivity{
                                     @Override
                                     public void onSuccess(Uri uri) {
                                         Log.e("로그","uri : "+uri);  //사진 -> uri
-                                        contentsList.add(index,uri.toString());
+                                        contentsList.set(index,uri.toString());
                                         successCount++;
                                         if(pathList.size()==successCount){
                                             //완료
                                             WriteInfo writeInfo = new WriteInfo(title,contentsList,user.getUid(),new Date());    //user.getUid()  = 로그인한 사용자
                                             storeUpload(writeInfo);
+                                            for(int a=0; a<contentsList.size();a++){
+                                                Log.e("로그","콘텐츠 : "+contentsList.get(a));
+                                            }
                                         }
                                     }
                                 });
@@ -179,7 +182,6 @@ public class WritePostActivity extends BasicActivity{
 
     private void myStartActivity(Class c,String media){
         Intent intent=new Intent(this, c);  //클래스로 받는 걸로 바꿈.  <- Intent intent=new Intent(this, MainActivity.class);
-        //intent.setFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP);   //뒤로가기 할때 깨끗하게
         intent.putExtra("media",media); //값 전달
         startActivityForResult(intent,0);  //사진 찍은 거 . 결과 받아야하니깐 startActivityForResult 사용함
     }
