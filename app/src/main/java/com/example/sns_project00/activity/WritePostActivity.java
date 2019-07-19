@@ -73,6 +73,7 @@ public class WritePostActivity extends BasicActivity{
                     EditText editText = new EditText(WritePostActivity.this);
                     editText.setLayoutParams(layoutParams);
                     editText.setInputType(InputType.TYPE_TEXT_FLAG_MULTI_LINE | InputType.TYPE_CLASS_TEXT);
+                    editText.setHint("내용");
                     parent.addView(editText);
                 }
                 break;
@@ -100,28 +101,29 @@ public class WritePostActivity extends BasicActivity{
 
     private void storageUpload() {
         final String title = ((EditText) findViewById(R.id.titleEditText)).getText().toString();
-        final String contents = ((EditText) findViewById(R.id.contentsEditText)).getText().toString();
 
 
-        if (title.length() > 0 && contents.length()>0) {
+        if (title.length() > 0) {
             final ArrayList<String> contentsList=new ArrayList<>();
             user = FirebaseAuth.getInstance().getCurrentUser();
             FirebaseStorage storage = FirebaseStorage.getInstance();
             StorageReference storageRef = storage.getReference();
+            FirebaseFirestore firebaseFirestore = FirebaseFirestore.getInstance(); //firestore 초기화
+           final DocumentReference documentReference = firebaseFirestore.collection("cities").document();
 
             for(int i=0; i<parent.getChildCount(); i++){   //안에 자식 뷰만큼 반복을 할거다
                 View view=parent.getChildAt(i); //자식뷰먼저 저장해주고!!(parent(부모) 안에 있는 뷰에 하나하나 접근을 할거다)
-                if(view instanceof EditText){ //view가 만약에 EditText이면
+                if(view instanceof EditText){ //★view가 만약에 EditText가 있으면 이게 실행이 되야된다.
                     String text= ((EditText)view).getText().toString();
                     if(text.length()>0){
                         contentsList.add(text);
                     }
                 }else {
                     contentsList.add(pathList.get(pathCount));
-                    final StorageReference mountainImagesRef = storageRef.child("users/"+user.getUid()+"/"+pathCount+".jpg");   //★★사용자의 Uid 가져와서 각각 넣음(구별)★★
+                    final StorageReference mountainImagesRef = storageRef.child("posts/"+documentReference.getId()+"/"+pathCount+".jpg");
                     try{
                         InputStream stream = new FileInputStream(new File(pathList.get(pathCount)));
-                        StorageMetadata metadata = new StorageMetadata.Builder().setCustomMetadata("index",""+pathCount).build();    //API에 사용 법 있음.StorageMetadata
+                        StorageMetadata metadata = new StorageMetadata.Builder().setCustomMetadata("index",""+(contentsList.size()-1)).build();    //API에 사용 법 있음.StorageMetadata
                         UploadTask uploadTask = mountainImagesRef.putStream(stream,metadata);
                         uploadTask.addOnFailureListener(new OnFailureListener() {
                             @Override
@@ -141,7 +143,7 @@ public class WritePostActivity extends BasicActivity{
                                         if(pathList.size()==successCount){
                                             //완료
                                             WriteInfo writeInfo = new WriteInfo(title,contentsList,user.getUid(),new Date());    //user.getUid()  = 로그인한 사용자
-                                            storeUpload(writeInfo);
+                                            storeUpload(documentReference,writeInfo);
                                             for(int a=0; a<contentsList.size();a++){
                                                 Log.e("로그","콘텐츠 : "+contentsList.get(a));
                                             }
@@ -163,20 +165,19 @@ public class WritePostActivity extends BasicActivity{
 
 
 
-    private void storeUpload(WriteInfo writeInfo){
-        FirebaseFirestore db = FirebaseFirestore.getInstance(); //firestore 초기화
-        db.collection("posts").add(writeInfo)     //firestore에 추가(add)
-                .addOnSuccessListener(new OnSuccessListener<DocumentReference>() {
+    private void storeUpload(DocumentReference documentReference ,WriteInfo writeInfo){
+        documentReference.set(writeInfo)
+            .addOnSuccessListener(new OnSuccessListener<Void>() {
                 @Override
-                public void onSuccess(DocumentReference documentReference) {
-                    Log.d(TAG, "DocumentSnapshot written with ID: " + documentReference.getId());
+                public void onSuccess(Void aVoid) {
+                    Log.d(TAG, "DocumentSnapshot successfully written!");
                 }
             })
             .addOnFailureListener(new OnFailureListener() {
                 @Override
                 public void onFailure(@NonNull Exception e) {
-                    Log.w(TAG, "Error adding document", e);
-                        }
+                    Log.w(TAG, "Error writing document", e);
+                }
             });
     }
 
