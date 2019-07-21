@@ -29,15 +29,23 @@
                 android:layout_height="wrap_content"
                 android:orientation="vertical">
 
-                <EditText
+                <LinearLayout
                     android:layout_width="match_parent"
-                    android:layout_height="wrap_content"
-                    android:ems="10"
-                    android:gravity="start|top"
-                    android:hint="내용"
-                    android:importantForAutofill="no"
-                    android:inputType="textMultiLine"
-                    tools:targetApi="o" />
+                    android:layout_height="match_parent"
+                    android:orientation="vertical">
+
+                    <EditText
+                        android:id="@+id/contentsEditText"
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:ems="10"
+                        android:gravity="start|top"
+                        android:hint="내용"
+                        android:importantForAutofill="no"
+                        android:inputType="textMultiLine"
+                        tools:targetApi="o" />
+                </LinearLayout>
+
             </LinearLayout>
 
 
@@ -68,13 +76,13 @@
     </ScrollView>
 
     <RelativeLayout
+        android:id="@+id/buttonsBackgroundLayout"
         android:layout_width="match_parent"
         android:layout_height="match_parent"
         android:background="#7E383838"
         android:visibility="gone">
 
         <androidx.cardview.widget.CardView
-            android:id="@+id/buttonsCardView"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:layout_alignParentBottom="true"
