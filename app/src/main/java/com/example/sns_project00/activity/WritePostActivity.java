@@ -199,7 +199,8 @@ public class WritePostActivity extends BasicActivity {
                         }
                     } else {
                         contentsList.add(pathList.get(pathCount));
-                        final StorageReference mountainImagesRef = storageRef.child("posts/" + documentReference.getId() + "/" + pathCount + ".jpg");
+                        String[] pathArray =pathList.get(pathCount).split("\\.");  // . 기준으로 string 배열로 반환을 해준다.그 중에 마지막 값이 확장자가 된다  (그러면 바로 아랫줄에 파일 확장자명에 맞게 잘 들어 갈 것이다.)
+                        final StorageReference mountainImagesRef = storageRef.child("posts/" + documentReference.getId() + "/" + pathCount + pathArray[pathArray.length-1]);
                         try {
                             InputStream stream = new FileInputStream(new File(pathList.get(pathCount)));
                             StorageMetadata metadata = new StorageMetadata.Builder().setCustomMetadata("index", "" + (contentsList.size() - 1)).build();    //API에 사용 법 있음.StorageMetadata

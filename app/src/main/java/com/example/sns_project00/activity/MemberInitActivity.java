@@ -1,10 +1,8 @@
 package com.example.sns_project00.activity;
 
 
-import android.Manifest;
 import android.app.Activity;
 import android.content.Intent;
-import android.content.pm.PackageManager;
 import android.net.Uri;
 import android.os.Bundle;
 import android.util.Log;
@@ -16,8 +14,6 @@ import android.widget.Toast;
 
 import androidx.annotation.NonNull;
 import androidx.cardview.widget.CardView;
-import androidx.core.app.ActivityCompat;
-import androidx.core.content.ContextCompat;
 
 import com.bumptech.glide.Glide;
 import com.example.sns_project00.MemberInfo;
@@ -104,40 +100,14 @@ public class MemberInitActivity extends BasicActivity {
                     myStartActivity(CameraActivity.class);
                     break;
                 case R.id.gallery:
-                    //일딴, 먼저 필요한 권한부터 요청    --권한1-1(요청)
-                    if (ContextCompat.checkSelfPermission(MemberInitActivity.this,   //권한이 없을때
-                            Manifest.permission.READ_EXTERNAL_STORAGE)
-                            != PackageManager.PERMISSION_GRANTED) {
-                        ActivityCompat.requestPermissions(MemberInitActivity.this,
-                                new String[]{Manifest.permission.READ_EXTERNAL_STORAGE},
-                                1);
-                        if (ActivityCompat.shouldShowRequestPermissionRationale(MemberInitActivity.this,
-                                Manifest.permission.READ_EXTERNAL_STORAGE)) {
-                        } else {
-                            Toast.makeText(getApplicationContext(),"권한을 허용해 주세요.",Toast.LENGTH_LONG).show();
-                        }
-                    }else{                                                                  //권한이 있을때
-                        myStartActivitygalleryerror(GalleryActivity.class);
-                    }
+                    myStartActivitygalleryerror(GalleryActivity.class);
                     break;
             }
         }
     };
 
 
-    //권한 요청 응답 처리    --권한1-2(응답)
-    @Override
-    public void onRequestPermissionsResult(int requestCode, String permissions[], int[] grantResults) {
-        switch (requestCode) {
-            case 1: {
-                if (grantResults.length > 0 && grantResults[0] == PackageManager.PERMISSION_GRANTED) {
-                    myStartActivity(GalleryActivity.class);    //권한을 허용하면 여기 실행된다.
-                } else {
-                    Toast.makeText(getApplicationContext(),"권한을 허용해 주세요.",Toast.LENGTH_LONG).show();
-                }
-            }
-        }
-    }
+
 
     private void storageUploader() {
         final String name = ((EditText) findViewById(R.id.edtnameINIT)).getText().toString();

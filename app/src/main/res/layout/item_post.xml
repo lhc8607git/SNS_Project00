@@ -1,17 +1,44 @@
 <?xml version="1.0" encoding="utf-8"?>
 <androidx.cardview.widget.CardView xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools"
     android:orientation="vertical"
-    android:layout_width="wrap_content"
+    android:layout_width="match_parent"
     android:layout_height="wrap_content"
     android:layout_margin="5dp"
     app:cardCornerRadius="10dp">
 
+   <LinearLayout
+       android:padding="10dp"
+       android:layout_width="match_parent"
+       android:layout_height="wrap_content"
+       android:orientation="vertical">
+      <TextView
+          android:id="@+id/titleTextView"
+          android:layout_width="match_parent"
+          android:layout_height="wrap_content"
+          android:textStyle="bold"
+          android:textColor="#000000"
+          android:textSize="20dp"
+          tools:text="타이블"/>
 
-   <TextView
-       android:id="@+id/textView"
-       android:layout_width="wrap_content"
-       android:layout_height="wrap_content" />
+      <LinearLayout
+          android:id="@+id/contentsLayout"
+          android:layout_width="match_parent"
+          android:layout_height="wrap_content"
+          android:orientation="vertical">
+
+      </LinearLayout>
+
+      <TextView
+          android:id="@+id/createAtTextView"
+          android:layout_width="match_parent"
+          android:layout_height="wrap_content"
+          android:gravity="end"
+          tools:text="2019-04-25"/>
+   </LinearLayout>
+
+
 
 
 </androidx.cardview.widget.CardView>

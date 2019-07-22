@@ -16,9 +16,11 @@ import com.google.android.gms.tasks.OnCompleteListener;
 import com.google.android.gms.tasks.Task;
 import com.google.firebase.auth.FirebaseAuth;
 import com.google.firebase.auth.FirebaseUser;
+import com.google.firebase.firestore.CollectionReference;
 import com.google.firebase.firestore.DocumentReference;
 import com.google.firebase.firestore.DocumentSnapshot;
 import com.google.firebase.firestore.FirebaseFirestore;
+import com.google.firebase.firestore.Query;
 import com.google.firebase.firestore.QueryDocumentSnapshot;
 import com.google.firebase.firestore.QuerySnapshot;
 
@@ -27,20 +29,23 @@ import java.util.Date;
 
 public class MainActivity extends BasicActivity {
     private static final String TAG = "MainActivity";
+    private FirebaseUser firebaseUser;
+    private FirebaseFirestore firebaseFirestore;
+    private RecyclerView recyclerView;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
         //setRequestedOrientation(ActivityInfo.SCREEN_ORIENTATION_PORTRAIT); //android 화면 (세로 모드로 고정)
-        FirebaseUser user =FirebaseAuth.getInstance().getCurrentUser();//중복되는 곳이 있어서 --------- (그냥,참고,,, 사용자의 UID를 사용할려면 이 코드 사용 해야함)
+        firebaseUser =FirebaseAuth.getInstance().getCurrentUser();//중복되는 곳이 있어서 --------- (그냥,참고,,, 사용자의 UID를 사용할려면 이 코드 사용 해야함)
 
-        if(user==null){   //★ 현재 로그인된 유저가 있는지 없는지 확인 하는 부분 (만약,로그인된 유저가 없으면 로그인 화면으로 이동)---  대박 이거 지리네 로그인이 유지되네 다시 들어와도 그대로네!!! //로그인 유지??할 수 있는 거 같은데??
+        if(firebaseUser==null){   //★ 현재 로그인된 유저가 있는지 없는지 확인 하는 부분 (만약,로그인된 유저가 없으면 로그인 화면으로 이동)---  대박 이거 지리네 로그인이 유지되네 다시 들어와도 그대로네!!! //로그인 유지??할 수 있는 거 같은데??
             myStartActivity(SignUpActivity.class);
         }else {  //사용자 정보 작성 안 했으면 보이고, 작성 했으면 안보이고 설정해줌.
-            FirebaseFirestore db = FirebaseFirestore.getInstance(); //firestore 초기화
-            DocumentReference docRef = db.collection("users").document(user.getUid());
-            docRef.get().addOnCompleteListener(new OnCompleteListener<DocumentSnapshot>() {
+            firebaseFirestore = FirebaseFirestore.getInstance(); //firestore 초기화
+            DocumentReference documentReference = firebaseFirestore.collection("users").document(firebaseUser.getUid());
+            documentReference.get().addOnCompleteListener(new OnCompleteListener<DocumentSnapshot>() {
                 @Override
                 public void onComplete(@NonNull Task<DocumentSnapshot> task) {
                     if (task.isSuccessful()) {
@@ -58,10 +63,19 @@ public class MainActivity extends BasicActivity {
                     }
                 }
             });
+        }
+        recyclerView =findViewById(R.id.recyclerView);
+        findViewById(R.id.floatingActionButton).setOnClickListener(onClickListener);
 
+        recyclerView.setHasFixedSize(true);
+        recyclerView.setLayoutManager(new LinearLayoutManager(MainActivity.this));
+    }
 
-            db.collection("posts")
-                    .get()
+    protected void onResume(){  //(액티비티가 재실행 되거나, 다시 왔을 때) 이것을 사용한다.
+        super.onResume();
+        if(firebaseUser!=null){
+            CollectionReference collectionReference=firebaseFirestore.collection("posts");
+            collectionReference.orderBy("createdAt", Query.Direction.DESCENDING).get()
                     .addOnCompleteListener(new OnCompleteListener<QuerySnapshot>() {
                         @Override
                         public void onComplete(@NonNull Task<QuerySnapshot> task) {
@@ -76,9 +90,6 @@ public class MainActivity extends BasicActivity {
                                             new Date(document.getDate("createdAt").getTime())));
                                     Log.e("로그","데이터 : "+document.getData().get("title").toString());
                                 }
-                                RecyclerView recyclerView =findViewById(R.id.recyclerView);
-                                recyclerView.setHasFixedSize(true);
-                                recyclerView.setLayoutManager(new LinearLayoutManager(MainActivity.this));
 
                                 //String[] myDataset={"강아지","고양이","드래곤","치킨"};   //임시사용
                                 RecyclerView.Adapter mAdapter = new MainAdapter(MainActivity.this,postList);     //myDataset이게 GalleryAdapter.java에 가보면 ArrayList<String>로 대어 있음.
@@ -88,10 +99,7 @@ public class MainActivity extends BasicActivity {
                             }
                         }
                     });
-
         }
-
-        findViewById(R.id.floatingActionButton).setOnClickListener(onClickListener);
     }
 
     View.OnClickListener onClickListener = new View.OnClickListener() {
