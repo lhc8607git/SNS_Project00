@@ -11,6 +11,7 @@ import android.util.Log;
 import android.view.View;
 import android.widget.EditText;
 import android.widget.ImageView;
+import android.widget.RelativeLayout;
 import android.widget.Toast;
 
 import androidx.annotation.NonNull;
@@ -41,6 +42,7 @@ import java.io.InputStream;
 public class MemberInitActivity extends BasicActivity {
     private static final String TAG = "MemberInitActivity";
     private ImageView profileImageView;
+    private RelativeLayout loaderLayout;
     private String profilePath;         //경로도 전역변수로 바꿔줌.;
     private FirebaseUser user;
 
@@ -49,6 +51,7 @@ public class MemberInitActivity extends BasicActivity {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_member_init);
 
+        loaderLayout=findViewById(R.id.loaderLayout);
         profileImageView= findViewById(R.id.profileimg);
         profileImageView.setOnClickListener(onClickListener);
 
@@ -87,7 +90,7 @@ public class MemberInitActivity extends BasicActivity {
         public void onClick(View v) {
             switch (v.getId()) {
                 case R.id.btncheckINIT:
-                    profileUpdate();
+                    storageUploader();
                     break;
                 case R.id.profileimg:
                     CardView cardView=findViewById(R.id.buttonsCardView);
@@ -136,13 +139,14 @@ public class MemberInitActivity extends BasicActivity {
         }
     }
 
-    private void profileUpdate() {
+    private void storageUploader() {
         final String name = ((EditText) findViewById(R.id.edtnameINIT)).getText().toString();
         final String phonenum = ((EditText) findViewById(R.id.edtphonenumINIT)).getText().toString();
         final String birthday = ((EditText) findViewById(R.id.edtbirthdayINIT)).getText().toString();
         final String address = ((EditText) findViewById(R.id.editaddressINIT)).getText().toString();
 
         if (name.length() > 0 && phonenum.length()>9 && birthday.length()>5 && address.length()>0) {
+            loaderLayout.setVisibility(View.VISIBLE);
             FirebaseStorage storage = FirebaseStorage.getInstance();
             StorageReference storageRef = storage.getReference();
             user = FirebaseAuth.getInstance().getCurrentUser();       //그래서 이렇게 수정함.
@@ -150,7 +154,7 @@ public class MemberInitActivity extends BasicActivity {
 
             if(profilePath == null){
                 MemberInfo memberInfo = new MemberInfo(name,phonenum,birthday,address);
-                uploader(memberInfo);
+                storeUploader(memberInfo);
             }else{
                 try{
                     InputStream stream = new FileInputStream(new File(profilePath));
@@ -171,7 +175,7 @@ public class MemberInitActivity extends BasicActivity {
                                 Log.e("성공","성공 : "+downloadUri);
 
                                 MemberInfo memberInfo = new MemberInfo(name,phonenum,birthday,address,downloadUri.toString());
-                                uploader(memberInfo);
+                                storeUploader(memberInfo);
                             } else {
                                 Toast.makeText(getApplicationContext(), "회원정보를 보내는데 실패하였습니다.", Toast.LENGTH_LONG).show();
                                 Log.e("로그","실패");
@@ -187,13 +191,14 @@ public class MemberInitActivity extends BasicActivity {
         }
     }
 
-    private void uploader(MemberInfo memberInfo){
+    private void storeUploader(MemberInfo memberInfo){
         FirebaseFirestore db = FirebaseFirestore.getInstance(); //firestore 초기화
         db.collection("users").document(user.getUid()).set(memberInfo)
                 .addOnSuccessListener(new OnSuccessListener<Void>() {          //성공 했을때 - 토스트로 알려주고 싶어서서
                     @Override
                     public void onSuccess(Void aVoid) {
                         Toast.makeText(getApplicationContext(), "회원정보 등록을 성공하였습니다.", Toast.LENGTH_LONG).show();
+                        loaderLayout.setVisibility(View.GONE);
                         finish();
                     }
                 })
@@ -201,6 +206,7 @@ public class MemberInitActivity extends BasicActivity {
                     @Override
                     public void onFailure(@NonNull Exception e) {
                         Toast.makeText(getApplicationContext(), "회원정보 등록을 실패하였습니다.", Toast.LENGTH_LONG).show();
+                        loaderLayout.setVisibility(View.GONE);
                         Log.w(TAG, "Error writing document", e);
                     }
                 });

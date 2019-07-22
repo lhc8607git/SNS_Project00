@@ -6,8 +6,12 @@ import android.util.Log;
 import android.view.View;
 
 import androidx.annotation.NonNull;
+import androidx.recyclerview.widget.LinearLayoutManager;
+import androidx.recyclerview.widget.RecyclerView;
 
+import com.example.sns_project00.PostInfo;
 import com.example.sns_project00.R;
+import com.example.sns_project00.adapter.MainAdapter;
 import com.google.android.gms.tasks.OnCompleteListener;
 import com.google.android.gms.tasks.Task;
 import com.google.firebase.auth.FirebaseAuth;
@@ -15,6 +19,11 @@ import com.google.firebase.auth.FirebaseUser;
 import com.google.firebase.firestore.DocumentReference;
 import com.google.firebase.firestore.DocumentSnapshot;
 import com.google.firebase.firestore.FirebaseFirestore;
+import com.google.firebase.firestore.QueryDocumentSnapshot;
+import com.google.firebase.firestore.QuerySnapshot;
+
+import java.util.ArrayList;
+import java.util.Date;
 
 public class MainActivity extends BasicActivity {
     private static final String TAG = "MainActivity";
@@ -49,9 +58,39 @@ public class MainActivity extends BasicActivity {
                     }
                 }
             });
+
+
+            db.collection("posts")
+                    .get()
+                    .addOnCompleteListener(new OnCompleteListener<QuerySnapshot>() {
+                        @Override
+                        public void onComplete(@NonNull Task<QuerySnapshot> task) {
+                            if (task.isSuccessful()) {
+                                ArrayList<PostInfo> postList = new ArrayList<>();
+                                for (QueryDocumentSnapshot document : task.getResult()) {
+                                    Log.d(TAG, document.getId() + " => " + document.getData());
+                                    postList.add(new PostInfo(
+                                            document.getData().get("title").toString(),
+                                            (ArrayList<String>)document.getData().get("contents"),
+                                            document.getData().get("publisher").toString(),
+                                            new Date(document.getDate("createdAt").getTime())));
+                                    Log.e("로그","데이터 : "+document.getData().get("title").toString());
+                                }
+                                RecyclerView recyclerView =findViewById(R.id.recyclerView);
+                                recyclerView.setHasFixedSize(true);
+                                recyclerView.setLayoutManager(new LinearLayoutManager(MainActivity.this));
+
+                                //String[] myDataset={"강아지","고양이","드래곤","치킨"};   //임시사용
+                                RecyclerView.Adapter mAdapter = new MainAdapter(MainActivity.this,postList);     //myDataset이게 GalleryAdapter.java에 가보면 ArrayList<String>로 대어 있음.
+                                recyclerView.setAdapter(mAdapter);
+                            } else {
+                                Log.d(TAG, "Error getting documents: ", task.getException());
+                            }
+                        }
+                    });
+
         }
 
-        findViewById(R.id.btnmainlogout).setOnClickListener(onClickListener);
         findViewById(R.id.floatingActionButton).setOnClickListener(onClickListener);
     }
 
@@ -59,10 +98,12 @@ public class MainActivity extends BasicActivity {
         @Override
         public void onClick(View v) {
             switch (v.getId()){
+                /*
                 case R.id.btnmainlogout:
                     FirebaseAuth.getInstance().signOut();   //★ Firebase Auth 로그아웃 하는 방법
                     myStartActivity(SignUpActivity.class);
                     break;
+                */
                 case R.id.floatingActionButton:
                     myStartActivity(WritePostActivity.class);
                     break;

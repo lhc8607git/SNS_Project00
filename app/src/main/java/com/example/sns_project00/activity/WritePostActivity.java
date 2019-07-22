@@ -18,7 +18,7 @@ import androidx.annotation.NonNull;
 
 import com.bumptech.glide.Glide;
 import com.example.sns_project00.R;
-import com.example.sns_project00.WriteInfo;
+import com.example.sns_project00.PostInfo;
 import com.google.android.gms.tasks.OnFailureListener;
 import com.google.android.gms.tasks.OnSuccessListener;
 import com.google.firebase.auth.FirebaseAuth;
@@ -43,6 +43,7 @@ public class WritePostActivity extends BasicActivity {
     private ArrayList<String> pathList = new ArrayList<>(); //이미지경로들을 담을 곳(이미지경로들을 알아야.. Storage에 그 경로들을 가지고 올릴 수가 있다.)
     private LinearLayout parent;
     private RelativeLayout buttonsBackgroundLayout;
+    private RelativeLayout loaderLayout;
     private ImageView selectedImageView; //이미지뷰를 선택했을 때 전역으로 저장하는 곳
     private  EditText selectedEditText;
     private int pathCount, successCount;
@@ -54,6 +55,7 @@ public class WritePostActivity extends BasicActivity {
 
         parent = findViewById(R.id.contentsLayout);
         buttonsBackgroundLayout = findViewById(R.id.buttonsBackgroundLayout);
+        loaderLayout=findViewById(R.id.loaderLayout);
 
         buttonsBackgroundLayout.setOnClickListener(onClickListener);
         findViewById(R.id.check).setOnClickListener(onClickListener);
@@ -178,6 +180,7 @@ public class WritePostActivity extends BasicActivity {
 
 
         if (title.length() > 0) {
+            loaderLayout.setVisibility(View.VISIBLE);
             final ArrayList<String> contentsList = new ArrayList<>();
             user = FirebaseAuth.getInstance().getCurrentUser();
             FirebaseStorage storage = FirebaseStorage.getInstance();
@@ -218,8 +221,8 @@ public class WritePostActivity extends BasicActivity {
                                             successCount++;
                                             if (pathList.size() == successCount) {
                                                 //완료
-                                                WriteInfo writeInfo = new WriteInfo(title, contentsList, user.getUid(), new Date());    //user.getUid()  = 로그인한 사용자
-                                                storeUpload(documentReference, writeInfo);
+                                                PostInfo postInfo = new PostInfo(title, contentsList, user.getUid(), new Date());    //user.getUid()  = 로그인한 사용자
+                                                storeUpload(documentReference, postInfo);
                                                 for (int a = 0; a < contentsList.size(); a++) {
                                                     Log.e("로그", "콘텐츠 : " + contentsList.get(a));
                                                 }
@@ -235,18 +238,24 @@ public class WritePostActivity extends BasicActivity {
                     }
                 }
             }
+            if(pathList.size()==0){
+                PostInfo postInfo = new PostInfo(title, contentsList, user.getUid(), new Date());    //user.getUid()  = 로그인한 사용자
+                storeUpload(documentReference, postInfo);
+            }
+
         } else {
             Toast.makeText(getApplicationContext(), "제목을 입력해주세요.", Toast.LENGTH_LONG).show();
         }
     }
 
 
-    private void storeUpload(DocumentReference documentReference, WriteInfo writeInfo) {
-        documentReference.set(writeInfo)
+    private void storeUpload(DocumentReference documentReference, PostInfo postInfo) {
+        documentReference.set(postInfo)
                 .addOnSuccessListener(new OnSuccessListener<Void>() {
                     @Override
                     public void onSuccess(Void aVoid) {
                         Log.d(TAG, "DocumentSnapshot successfully written!");
+                        loaderLayout.setVisibility(View.GONE);
                         finish();
                     }
                 })
@@ -254,6 +263,7 @@ public class WritePostActivity extends BasicActivity {
                     @Override
                     public void onFailure(@NonNull Exception e) {
                         Log.w(TAG, "Error writing document", e);
+                        loaderLayout.setVisibility(View.GONE);
                     }
                 });
     }
