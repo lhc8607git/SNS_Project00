@@ -1,9 +1,10 @@
 package com.example.sns_project00;
 
+import java.io.Serializable;
 import java.util.ArrayList;
 import java.util.Date;
 
-public class PostInfo {
+public class PostInfo implements Serializable {  //implements Serializable   -> 커스텀한 객체를 받을려면 이거 사용 해야 한다.!!
     private String title;
     private ArrayList<String> contents;   //내용
     private String publisher;
@@ -23,7 +24,6 @@ public class PostInfo {
         this.contents = contents;
         this.publisher = publisher;
         this.createdAt =createdAt;
-        this.id=id;
     }
 
     public String getTitle() {
