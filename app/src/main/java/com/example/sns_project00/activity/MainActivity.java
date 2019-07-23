@@ -71,6 +71,7 @@ public class MainActivity extends BasicActivity {
         recyclerView.setLayoutManager(new LinearLayoutManager(MainActivity.this));
     }
 
+    @Override
     protected void onResume(){  //(액티비티가 재실행 되거나, 다시 왔을 때) 이것을 사용한다.
         super.onResume();
         if(firebaseUser!=null){
@@ -87,7 +88,8 @@ public class MainActivity extends BasicActivity {
                                             document.getData().get("title").toString(),
                                             (ArrayList<String>)document.getData().get("contents"),
                                             document.getData().get("publisher").toString(),
-                                            new Date(document.getDate("createdAt").getTime())));
+                                            new Date(document.getDate("createdAt").getTime()),
+                                            document.getId()));
                                     Log.e("로그","데이터 : "+document.getData().get("title").toString());
                                 }
 
