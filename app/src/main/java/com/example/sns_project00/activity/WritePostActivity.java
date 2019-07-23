@@ -186,7 +186,14 @@ public class WritePostActivity extends BasicActivity {
             FirebaseStorage storage = FirebaseStorage.getInstance();
             StorageReference storageRef = storage.getReference();
             FirebaseFirestore firebaseFirestore = FirebaseFirestore.getInstance(); //firestore 초기화
-            final DocumentReference documentReference = firebaseFirestore.collection("posts").document();
+            String id=getIntent().getStringExtra("id");
+            DocumentReference dr;
+            if(id==null){
+                dr=firebaseFirestore.collection("posts").document();
+            }else {
+                dr=firebaseFirestore.collection("posts").document(id);
+            }
+            final DocumentReference documentReference = dr;
 
             for (int i = 0; i < parent.getChildCount(); i++) {   //안에 자식 뷰만큼 반복을 할거다
                 LinearLayout linearLayout = (LinearLayout)parent.getChildAt(i); //자식뷰먼저 저장해주고!!(parent(부모) 안에 있는 뷰에 하나하나 접근을 할거다)

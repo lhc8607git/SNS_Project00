@@ -11,7 +11,6 @@ import android.widget.ImageView;
 import android.widget.LinearLayout;
 import android.widget.PopupMenu;
 import android.widget.TextView;
-import android.widget.Toast;
 
 import androidx.annotation.NonNull;
 import androidx.cardview.widget.CardView;
@@ -20,8 +19,7 @@ import androidx.recyclerview.widget.RecyclerView;
 import com.bumptech.glide.Glide;
 import com.example.sns_project00.PostInfo;
 import com.example.sns_project00.R;
-import com.google.android.gms.tasks.OnFailureListener;
-import com.google.android.gms.tasks.OnSuccessListener;
+import com.example.sns_project00.listener.OnPostListener;
 import com.google.firebase.firestore.FirebaseFirestore;
 
 import java.text.SimpleDateFormat;
@@ -32,35 +30,15 @@ public class MainAdapter extends RecyclerView.Adapter<MainAdapter.MainViewHolder
     private ArrayList<PostInfo> mDataset;
     private Activity activity;
     private FirebaseFirestore firebaseFirestore;
+    private OnPostListener onPostListener;
 
     static class MainViewHolder extends RecyclerView.ViewHolder {
         // each data item is just a string in this case
         CardView cardView;
-        MainViewHolder(Activity activity,CardView v, PostInfo postInfo) {
+        MainViewHolder(CardView v) {
             super(v);
             cardView = v;
 
-            LinearLayout contentsLayout = cardView.findViewById(R.id.contentsLayout);
-            ViewGroup.LayoutParams layoutParams = new ViewGroup.LayoutParams(ViewGroup.LayoutParams.MATCH_PARENT, ViewGroup.LayoutParams.WRAP_CONTENT);  //여기다가 컨텐츠를 넣어주면된다
-            ArrayList<String> contentsList = postInfo.getContents();
-
-
-            if (contentsLayout.getChildCount() == 0) {
-                for (int i = 0; i < contentsList.size(); i++) {
-                    String contents = contentsList.get(i);
-                    if (Patterns.WEB_URL.matcher(contents).matches()) { //URL인지를 검사 하는 방법
-                        ImageView imageView = new ImageView(activity);
-                        imageView.setLayoutParams(layoutParams);
-                        imageView.setAdjustViewBounds(true); //사진 비율이 맞춰진다
-                        imageView.setScaleType(ImageView.ScaleType.FIT_XY);
-                        contentsLayout.addView(imageView);
-                    } else {
-                        TextView textView = new TextView(activity);
-                        textView.setLayoutParams(layoutParams);
-                        contentsLayout.addView(textView);
-                    }
-                }
-            }
         }
     }
 
@@ -68,6 +46,10 @@ public class MainAdapter extends RecyclerView.Adapter<MainAdapter.MainViewHolder
         mDataset = myDataset;
         this.activity=activity;
         firebaseFirestore = FirebaseFirestore.getInstance();
+    }
+
+    public void setOnPostListener(OnPostListener onPostListener){
+        this.onPostListener=onPostListener;
     }
 
     @Override
@@ -79,7 +61,7 @@ public class MainAdapter extends RecyclerView.Adapter<MainAdapter.MainViewHolder
     @Override
     public MainAdapter.MainViewHolder onCreateViewHolder(@NonNull ViewGroup parent, int viewType) {     // --------이 부분  리스트에 Adapter에서 사용할 레이아웃을 설정해주는거 (이거 해봤잖어. 그냥 이거 쓰겠다라는거(레이아웃))
         CardView cardView = (CardView) LayoutInflater.from(parent.getContext()).inflate(R.layout.item_post, parent, false);
-        final MainViewHolder mainViewHolder = new MainViewHolder(activity,cardView,mDataset.get(viewType));
+        final MainViewHolder mainViewHolder = new MainViewHolder(cardView);
         cardView.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
@@ -111,15 +93,29 @@ public class MainAdapter extends RecyclerView.Adapter<MainAdapter.MainViewHolder
 //        imageView.setImageBitmap(bmp);
 
         LinearLayout contentsLayout = cardView.findViewById(R.id.contentsLayout);
+        ViewGroup.LayoutParams layoutParams = new ViewGroup.LayoutParams(ViewGroup.LayoutParams.MATCH_PARENT, ViewGroup.LayoutParams.WRAP_CONTENT);  //여기다가 컨텐츠를 넣어주면된다
         ArrayList<String> contentsList = mDataset.get(position).getContents();
 
-
-        for(int i=0; i<contentsList.size();i++){
-            String contents =contentsList.get(i);
-            if(Patterns.WEB_URL.matcher(contents).matches()){ //URL인지를 검사 하는 방법
-                Glide.with(activity).load(contents).override(1000).thumbnail(0.1f).into((ImageView)contentsLayout.getChildAt(i)); //image리사이징(외부 라이브러리)
-            }else {
-                ((TextView)contentsLayout.getChildAt(i)).setText(contents);
+        if(contentsLayout.getTag()==null || !contentsLayout.getTag().equals(contentsList)){
+            contentsLayout.setTag(contentsList);
+            contentsLayout.removeAllViews();
+            if(contentsList.size()>0){
+                for (int i = 0; i < contentsList.size(); i++) {
+                    String contents = contentsList.get(i);
+                    if (Patterns.WEB_URL.matcher(contents).matches()) { //URL인지를 검사 하는 방법
+                        ImageView imageView = new ImageView(activity);
+                        imageView.setLayoutParams(layoutParams);
+                        imageView.setAdjustViewBounds(true); //사진 비율이 맞춰진다
+                        imageView.setScaleType(ImageView.ScaleType.FIT_XY);
+                        contentsLayout.addView(imageView);
+                        Glide.with(activity).load(contents).override(1000).thumbnail(0.1f).into(imageView); //image리사이징(외부 라이브러리)
+                    } else {
+                        TextView textView = new TextView(activity);
+                        textView.setLayoutParams(layoutParams);
+                        textView.setText(contents);
+                        contentsLayout.addView(textView);
+                    }
+                }
             }
         }
     }
@@ -134,27 +130,13 @@ public class MainAdapter extends RecyclerView.Adapter<MainAdapter.MainViewHolder
         popup.setOnMenuItemClickListener(new PopupMenu.OnMenuItemClickListener() {
             @Override
             public boolean onMenuItemClick(MenuItem menuItem) {
+                String id=mDataset.get(position).getId();
                 switch (menuItem.getItemId()) {
                     case R.id.modify:
-
+                        onPostListener.onModify(id);
                         return true;
                     case R.id.delete:
-
-                        firebaseFirestore.collection("posts").document(mDataset.get(position).getId())
-                                .delete()
-                                .addOnSuccessListener(new OnSuccessListener<Void>() {
-                                    @Override
-                                    public void onSuccess(Void aVoid) {
-                                        Toast.makeText(activity,"게시글을 삭제하였습니다.",Toast.LENGTH_LONG).show();
-                                    }
-                                })
-                                .addOnFailureListener(new OnFailureListener() {
-                                    @Override
-                                    public void onFailure(@NonNull Exception e) {
-                                        Toast.makeText(activity,"게시글을 삭제하지 못하였습니다.",Toast.LENGTH_LONG).show();
-                                    }
-                                });
-
+                        onPostListener.onDelete(id);
                         return true;
                     default:
                         return false;

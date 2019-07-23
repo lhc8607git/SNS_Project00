@@ -11,8 +11,12 @@ import androidx.recyclerview.widget.RecyclerView;
 
 import com.example.sns_project00.PostInfo;
 import com.example.sns_project00.R;
+import com.example.sns_project00.Util;
 import com.example.sns_project00.adapter.MainAdapter;
+import com.example.sns_project00.listener.OnPostListener;
 import com.google.android.gms.tasks.OnCompleteListener;
+import com.google.android.gms.tasks.OnFailureListener;
+import com.google.android.gms.tasks.OnSuccessListener;
 import com.google.android.gms.tasks.Task;
 import com.google.firebase.auth.FirebaseAuth;
 import com.google.firebase.auth.FirebaseUser;
@@ -31,7 +35,9 @@ public class MainActivity extends BasicActivity {
     private static final String TAG = "MainActivity";
     private FirebaseUser firebaseUser;
     private FirebaseFirestore firebaseFirestore;
-    private RecyclerView recyclerView;
+    private MainAdapter mainAdapter;
+    private  ArrayList<PostInfo> postList;
+    private Util util;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -64,45 +70,54 @@ public class MainActivity extends BasicActivity {
                 }
             });
         }
-        recyclerView =findViewById(R.id.recyclerView);
+
+        util=new Util(this);
+        postList = new ArrayList<>();
+        //String[] myDataset={"강아지","고양이","드래곤","치킨"};   //임시사용
+        mainAdapter = new MainAdapter(MainActivity.this,postList);     //myDataset이게 GalleryAdapter.java에 가보면 ArrayList<String>로 대어 있음.
+        mainAdapter.setOnPostListener(onPostListener);
+
+        RecyclerView recyclerView =findViewById(R.id.recyclerView);
         findViewById(R.id.floatingActionButton).setOnClickListener(onClickListener);
 
         recyclerView.setHasFixedSize(true);
         recyclerView.setLayoutManager(new LinearLayoutManager(MainActivity.this));
+        recyclerView.setAdapter(mainAdapter);
     }
 
     @Override
     protected void onResume(){  //(액티비티가 재실행 되거나, 다시 왔을 때) 이것을 사용한다.
         super.onResume();
-        if(firebaseUser!=null){
-            CollectionReference collectionReference=firebaseFirestore.collection("posts");
-            collectionReference.orderBy("createdAt", Query.Direction.DESCENDING).get()
-                    .addOnCompleteListener(new OnCompleteListener<QuerySnapshot>() {
-                        @Override
-                        public void onComplete(@NonNull Task<QuerySnapshot> task) {
-                            if (task.isSuccessful()) {
-                                ArrayList<PostInfo> postList = new ArrayList<>();
-                                for (QueryDocumentSnapshot document : task.getResult()) {
-                                    Log.d(TAG, document.getId() + " => " + document.getData());
-                                    postList.add(new PostInfo(
-                                            document.getData().get("title").toString(),
-                                            (ArrayList<String>)document.getData().get("contents"),
-                                            document.getData().get("publisher").toString(),
-                                            new Date(document.getDate("createdAt").getTime()),
-                                            document.getId()));
-                                    Log.e("로그","데이터 : "+document.getData().get("title").toString());
-                                }
+        PostUpdate();
+    }
 
-                                //String[] myDataset={"강아지","고양이","드래곤","치킨"};   //임시사용
-                                RecyclerView.Adapter mAdapter = new MainAdapter(MainActivity.this,postList);     //myDataset이게 GalleryAdapter.java에 가보면 ArrayList<String>로 대어 있음.
-                                recyclerView.setAdapter(mAdapter);
-                            } else {
-                                Log.d(TAG, "Error getting documents: ", task.getException());
-                            }
+
+    OnPostListener onPostListener=new OnPostListener() {
+        @Override
+        public void onDelete(String id) {
+            Log.e("로그","삭제"+id);
+            firebaseFirestore.collection("posts").document(id)
+                    .delete()
+                    .addOnSuccessListener(new OnSuccessListener<Void>() {
+                        @Override
+                        public void onSuccess(Void aVoid) {
+                            util.showToast("게시글을 삭제하였습니다.");
+                            PostUpdate();
+                        }
+                    })
+                    .addOnFailureListener(new OnFailureListener() {
+                        @Override
+                        public void onFailure(@NonNull Exception e) {
+                            util.showToast("게시글을 삭제하지 못했습니다.");
                         }
                     });
         }
-    }
+
+        @Override
+        public void onModify(String id) {
+            myStartActivity(WritePostActivity.class,id);
+        }
+    };
 
     View.OnClickListener onClickListener = new View.OnClickListener() {
         @Override
@@ -121,8 +136,42 @@ public class MainActivity extends BasicActivity {
         }
     };
 
+    private void PostUpdate(){
+        if(firebaseUser!=null){
+            CollectionReference collectionReference=firebaseFirestore.collection("posts");
+            collectionReference.orderBy("createdAt", Query.Direction.DESCENDING).get()
+                    .addOnCompleteListener(new OnCompleteListener<QuerySnapshot>() {
+                        @Override
+                        public void onComplete(@NonNull Task<QuerySnapshot> task) {
+                            if (task.isSuccessful()) {
+                                postList.clear();
+                                for (QueryDocumentSnapshot document : task.getResult()) {
+                                    Log.d(TAG, document.getId() + " => " + document.getData());
+                                    postList.add(new PostInfo(
+                                            document.getData().get("title").toString(),
+                                            (ArrayList<String>)document.getData().get("contents"),
+                                            document.getData().get("publisher").toString(),
+                                            new Date(document.getDate("createdAt").getTime()),
+                                            document.getId()));
+                                    Log.e("로그","데이터 : "+document.getData().get("title").toString());
+                                }
+                                mainAdapter.notifyDataSetChanged();
+                            } else {
+                                Log.d(TAG, "Error getting documents: ", task.getException());
+                            }
+                        }
+                    });
+        }
+    }
+
     private void myStartActivity(Class c){
         Intent intent=new Intent(this, c);  //클래스로 받는 걸로 바꿈.  <- Intent intent=new Intent(this, MainActivity.class);
+        intent.setFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP);   //뒤로가기 할때 깨끗하게
+        startActivity(intent);
+    }
+    private void myStartActivity(Class c,String id){
+        Intent intent=new Intent(this, c);  //클래스로 받는 걸로 바꿈.  <- Intent intent=new Intent(this, MainActivity.class);
+        intent.putExtra("id",id);
         intent.setFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP);   //뒤로가기 할때 깨끗하게
         startActivity(intent);
     }
