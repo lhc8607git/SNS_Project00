@@ -8,7 +8,6 @@ import android.database.Cursor;
 import android.net.Uri;
 import android.os.Bundle;
 import android.provider.MediaStore;
-import android.widget.Toast;
 
 import androidx.annotation.NonNull;
 import androidx.core.app.ActivityCompat;
@@ -20,6 +19,8 @@ import com.example.sns_project00.R;
 import com.example.sns_project00.adapter.GalleryAdapter;
 
 import java.util.ArrayList;
+
+import static com.example.sns_project00.Util.showToast;
 
 public class GalleryActivity extends BasicActivity {
 
@@ -39,7 +40,8 @@ public class GalleryActivity extends BasicActivity {
             if (ActivityCompat.shouldShowRequestPermissionRationale(GalleryActivity.this,
                     Manifest.permission.READ_EXTERNAL_STORAGE)) {
             } else {
-                Toast.makeText(getApplicationContext(),"권한을 허용해 주세요.",Toast.LENGTH_LONG).show();
+                showToast(GalleryActivity.this,"권한을 허용해 주세요.");
+                //Toast.makeText(getApplicationContext(),"권한을 허용해 주세요.",Toast.LENGTH_LONG).show();
             }
         }else{                                                                  //권한이 있을때
             recyclerInit();
@@ -57,7 +59,8 @@ public class GalleryActivity extends BasicActivity {
                     recyclerInit();
                 } else {
                     finish();
-                    Toast.makeText(getApplicationContext(),"권한을 허용해 주세요.",Toast.LENGTH_LONG).show();
+                    showToast(GalleryActivity.this,"권한을 허용해 주세요.");
+                    //Toast.makeText(getApplicationContext(),"권한을 허용해 주세요.",Toast.LENGTH_LONG).show();
                 }
             }
         }

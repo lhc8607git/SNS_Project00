@@ -6,21 +6,19 @@ import android.net.Uri;
 import android.os.Bundle;
 import android.text.InputType;
 import android.util.Log;
-import android.util.Patterns;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.EditText;
 import android.widget.ImageView;
 import android.widget.LinearLayout;
 import android.widget.RelativeLayout;
-import android.widget.Toast;
 
 import androidx.annotation.NonNull;
 
 import com.bumptech.glide.Glide;
-import com.example.sns_project00.R;
 import com.example.sns_project00.PostInfo;
-import com.example.sns_project00.Util;
+import com.example.sns_project00.R;
+import com.example.sns_project00.view.ContentsItemView;
 import com.google.android.gms.tasks.OnFailureListener;
 import com.google.android.gms.tasks.OnSuccessListener;
 import com.google.firebase.auth.FirebaseAuth;
@@ -39,6 +37,10 @@ import java.io.InputStream;
 import java.util.ArrayList;
 import java.util.Date;
 
+import static com.example.sns_project00.Util.isStorageUrl;
+import static com.example.sns_project00.Util.showToast;
+import static com.example.sns_project00.Util.storageUrlToName;
+
 public class WritePostActivity extends BasicActivity {
     private static final String TAG = "WritePostActivity";
     private FirebaseUser user;
@@ -52,7 +54,6 @@ public class WritePostActivity extends BasicActivity {
     private  EditText contentsEditText;
     private  EditText titleEditText;
     private PostInfo postInfo;
-    private Util util;
     private int pathCount, successCount;
 
     @Override
@@ -86,7 +87,6 @@ public class WritePostActivity extends BasicActivity {
         FirebaseStorage storage = FirebaseStorage.getInstance();
         storageRef = storage.getReference();
 
-        util=new Util(this);
 
         postInfo=(PostInfo)getIntent().getSerializableExtra("postInfo");
         postInit();
@@ -101,22 +101,27 @@ public class WritePostActivity extends BasicActivity {
                     String profilePath = data.getStringExtra("profilePath");
                     pathList.add(profilePath);
 
+                    /*
                     ViewGroup.LayoutParams layoutParams = new ViewGroup.LayoutParams(ViewGroup.LayoutParams.MATCH_PARENT, ViewGroup.LayoutParams.WRAP_CONTENT);
                     LinearLayout linearLayout = new LinearLayout(WritePostActivity.this);
                     linearLayout.setLayoutParams(layoutParams);
                     linearLayout.setOrientation(LinearLayout.VERTICAL);
+                    */
+
+                    ContentsItemView contentsItemView=new ContentsItemView(this);
 
                     if(selectedEditText ==null){   //null(Text가 없을경우)일때는 그냥 편소처럼 아래로 추가되게하고
-                        parent.addView(linearLayout);
+                        parent.addView(contentsItemView);
                     }else {
                         for(int i =0; i< parent.getChildCount(); i++){
                             if(parent.getChildAt(i)==selectedEditText.getParent()){    //현재 selected의 위치
-                                parent.addView(linearLayout,i+1);   //현재 selected의 위치에서 그다음에 만든다는 뜻이다
+                                parent.addView(contentsItemView,i+1);   //현재 selected의 위치에서 그다음에 만든다는 뜻이다
                                 break;
                             }
                         }
                     }
-                                     ImageView imageView = new ImageView(WritePostActivity.this);
+                    /*
+                    ImageView imageView = new ImageView(WritePostActivity.this);
                     imageView.setLayoutParams(layoutParams);
                     imageView.setAdjustViewBounds(true);
                     imageView.setScaleType(ImageView.ScaleType.FIT_XY);
@@ -137,6 +142,7 @@ public class WritePostActivity extends BasicActivity {
                     editText.setHint("내용");
                     editText.setOnFocusChangeListener(onFocusChangeListener);
                     linearLayout.addView(editText);
+                    */
                 }
                 break;
             case 1:
@@ -178,21 +184,16 @@ public class WritePostActivity extends BasicActivity {
                 case R.id.delete:
                     View selectedView = (View)selectedImageView.getParent();
 
-                    String[] list=pathList.get(parent.indexOfChild(selectedView)-1).split("\\?"); //이런식으로 나누고
-                    String[] list2=list[0].split("%2F");
-                    String name =list2[list2.length-1];
-
-                    StorageReference desertRef = storageRef.child("posts/"+postInfo.getId()+"/"+name);
+                    StorageReference desertRef = storageRef.child("posts/"+postInfo.getId()+"/"+storageUrlToName(pathList.get(parent.indexOfChild(selectedView)-1)));
                     desertRef.delete().addOnSuccessListener(new OnSuccessListener<Void>() {
                         @Override
                         public void onSuccess(Void aVoid) {
-                            util.showToast("파일을 삭제 하였습니다.");
+                            showToast(WritePostActivity.this,"파일을 삭제 하였습니다.");
                         }
                     }).addOnFailureListener(new OnFailureListener() {
                         @Override
                         public void onFailure(@NonNull Exception exception) {
-                            util.showToast("파일을 삭제하는데 실패하였습니다.");
-
+                            showToast(WritePostActivity.this,"파일을 삭제하는데 실패하였습니다.");
                         }
                     });
 
@@ -239,7 +240,7 @@ public class WritePostActivity extends BasicActivity {
                         if (text.length() > 0) {
                             contentsList.add(text);
                         }
-                    } else if(!Patterns.WEB_URL.matcher(pathList.get(pathCount)).matches()){  //경로가 URL이 아닐때만 경로를 처리하도록 한다
+                    } else if(!isStorageUrl(pathList.get(pathCount))){  //경로가 URL이 아닐때만 경로를 처리하도록 한다
                         String path=pathList.get(pathCount);
                         successCount++;
                         contentsList.add(path);
@@ -284,7 +285,8 @@ public class WritePostActivity extends BasicActivity {
             }
 
         } else {
-            Toast.makeText(getApplicationContext(), "제목을 입력해주세요.", Toast.LENGTH_LONG).show();
+            showToast(WritePostActivity.this,"제목을 입력해주세요.");
+            //Toast.makeText(getApplicationContext(), "제목을 입력해주세요.", Toast.LENGTH_LONG).show();
         }
     }
 
@@ -314,7 +316,7 @@ public class WritePostActivity extends BasicActivity {
             ArrayList<String> contentsList = postInfo.getContents();
             for (int i = 0; i < contentsList.size(); i++) {
                 String contents = contentsList.get(i);
-                if (Patterns.WEB_URL.matcher(contents).matches() && contents.contains("https://firebasestorage.googleapis.com/v0/b/sns-project00.appspot.com/o/post")) {  //1.URL인지를 검사 하는 방법 && 2.URL 경로가 맞는지 검사
+                if (isStorageUrl(contents)) {  //1.URL인지를 검사 하는 방법 && 2.URL 경로가 맞는지 검사
                     pathList.add(contents);
 
                     ViewGroup.LayoutParams layoutParams = new ViewGroup.LayoutParams(ViewGroup.LayoutParams.MATCH_PARENT, ViewGroup.LayoutParams.WRAP_CONTENT);
@@ -344,7 +346,7 @@ public class WritePostActivity extends BasicActivity {
                     editText.setHint("내용");
                     if(i<contentsList.size()-1){
                         String nextContents =contentsList.get(i+1);
-                        if(!Patterns.WEB_URL.matcher(nextContents).matches() || !nextContents.contains("https://firebasestorage.googleapis.com/v0/b/sns-project00.appspot.com/o/post")){
+                        if(!isStorageUrl(contents)){
                             editText.setText(nextContents);
                         }
                     }

@@ -3,7 +3,6 @@ package com.example.sns_project00.activity;
 import android.content.Intent;
 import android.os.Bundle;
 import android.util.Log;
-import android.util.Patterns;
 import android.view.View;
 
 import androidx.annotation.NonNull;
@@ -12,7 +11,6 @@ import androidx.recyclerview.widget.RecyclerView;
 
 import com.example.sns_project00.PostInfo;
 import com.example.sns_project00.R;
-import com.example.sns_project00.Util;
 import com.example.sns_project00.adapter.MainAdapter;
 import com.example.sns_project00.listener.OnPostListener;
 import com.google.android.gms.tasks.OnCompleteListener;
@@ -34,6 +32,10 @@ import com.google.firebase.storage.StorageReference;
 import java.util.ArrayList;
 import java.util.Date;
 
+import static com.example.sns_project00.Util.isStorageUrl;
+import static com.example.sns_project00.Util.showToast;
+import static com.example.sns_project00.Util.storageUrlToName;
+
 public class MainActivity extends BasicActivity {
     private static final String TAG = "MainActivity";
     private FirebaseUser firebaseUser;
@@ -41,7 +43,6 @@ public class MainActivity extends BasicActivity {
     private StorageReference storageRef;
     private MainAdapter mainAdapter;
     private  ArrayList<PostInfo> postList;
-    private Util util;
     private int successCount;
 
     @Override
@@ -79,7 +80,6 @@ public class MainActivity extends BasicActivity {
             });
         }
 
-        util=new Util(this);
         postList = new ArrayList<>();
         //String[] myDataset={"강아지","고양이","드래곤","치킨"};   //임시사용
         mainAdapter = new MainAdapter(MainActivity.this,postList);     //myDataset이게 GalleryAdapter.java에 가보면 ArrayList<String>로 대어 있음.
@@ -108,12 +108,9 @@ public class MainActivity extends BasicActivity {
             ArrayList<String> contentsList = postList.get(position).getContents();
             for (int i = 0; i < contentsList.size(); i++) {
                 String contents = contentsList.get(i);
-                if (Patterns.WEB_URL.matcher(contents).matches() && contents.contains("https://firebasestorage.googleapis.com/v0/b/sns-project00.appspot.com/o/posts")) {  //1.URL인지를 검사 하는 방법 && 2.URL 경로가 맞는지 검사
+                if (isStorageUrl(contents)) {  //1.URL인지를 검사 하는 방법 && 2.URL 경로가 맞는지 검사
                     successCount++;
-                    String[] list=contents.split("\\?"); //이런식으로 나누고
-                    String[] list2=list[0].split("%2F");
-                    String name =list2[list2.length-1];
-                    StorageReference desertRef = storageRef.child("posts/"+id+"/"+name);
+                    StorageReference desertRef = storageRef.child("posts/"+id+"/"+storageUrlToName(contents));
                     desertRef.delete().addOnSuccessListener(new OnSuccessListener<Void>() {
                         @Override
                         public void onSuccess(Void aVoid) {
@@ -123,7 +120,7 @@ public class MainActivity extends BasicActivity {
                     }).addOnFailureListener(new OnFailureListener() {
                         @Override
                         public void onFailure(@NonNull Exception exception) {
-                            util.showToast("ERROR");
+                            showToast(MainActivity.this,"ERROR");
 
                         }
                     });
@@ -191,14 +188,14 @@ public class MainActivity extends BasicActivity {
                     .addOnSuccessListener(new OnSuccessListener<Void>() {
                         @Override
                         public void onSuccess(Void aVoid) {
-                            util.showToast("게시글을 삭제하였습니다.");
+                          showToast(MainActivity.this,"게시글을 삭제하였습니다.");
                             PostUpdate();
                         }
                     })
                     .addOnFailureListener(new OnFailureListener() {
                         @Override
                         public void onFailure(@NonNull Exception e) {
-                            util.showToast("게시글을 삭제하지 못했습니다.");
+                          showToast(MainActivity.this,"게시글을 삭제하지 못했습니다.");
                         }
                     });
         }

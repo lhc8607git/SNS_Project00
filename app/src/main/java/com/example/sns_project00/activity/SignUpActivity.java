@@ -16,6 +16,8 @@ import com.google.firebase.auth.AuthResult;
 import com.google.firebase.auth.FirebaseAuth;
 import com.google.firebase.auth.FirebaseUser;
 
+import static com.example.sns_project00.Util.showToast;
+
 public class SignUpActivity extends BasicActivity {
     //private static final String TAG = "SignUpActivity";
     private FirebaseAuth mAuth;
@@ -72,12 +74,14 @@ public class SignUpActivity extends BasicActivity {
                                 loaderLayout.setVisibility(View.GONE);
                                 if (task.isSuccessful()) {
                                     FirebaseUser user = mAuth.getCurrentUser();
-                                    startToast("회원가입에 성공하셨습니다");
+                                    showToast(SignUpActivity.this,"회원가입에 성공하셨습니다");
+                                   // startToast("회원가입에 성공하셨습니다");
                                     myStartActivity(MainActivity.class);   //성공시 바로 이동
                                     //성공했을 때 로직 UI
                                 } else {
                                     if(task.getException()!=null){
-                                        startToast(task.getException().toString());
+                                        showToast(SignUpActivity.this,task.getException().toString());
+                                      //  startToast(task.getException().toString());
                                     }
 
                                     //실패 했을 때 UI 로직
@@ -85,11 +89,13 @@ public class SignUpActivity extends BasicActivity {
                             }
                         });
             } else {
-                Toast.makeText(getApplicationContext(), "비밀번호가 일치하지 않습니다.", Toast.LENGTH_LONG).show();
+                showToast(SignUpActivity.this,"비밀번호가 일치하지 않습니다.");
+               // Toast.makeText(getApplicationContext(), "비밀번호가 일치하지 않습니다.", Toast.LENGTH_LONG).show();
             }
 
         } else {
-            Toast.makeText(getApplicationContext(), "이메일 또는 비밀번호를 입력해 주세요.", Toast.LENGTH_LONG).show();
+            showToast(SignUpActivity.this,"이메일 또는 비밀번호를 입력해 주세요.");
+          //  Toast.makeText(getApplicationContext(), "이메일 또는 비밀번호를 입력해 주세요.", Toast.LENGTH_LONG).show();
         }
     }
 

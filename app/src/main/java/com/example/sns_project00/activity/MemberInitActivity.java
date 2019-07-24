@@ -35,6 +35,8 @@ import java.io.FileInputStream;
 import java.io.FileNotFoundException;
 import java.io.InputStream;
 
+import static com.example.sns_project00.Util.showToast;
+
 public class MemberInitActivity extends BasicActivity {
     private static final String TAG = "MemberInitActivity";
     private ImageView profileImageView;
@@ -147,7 +149,9 @@ public class MemberInitActivity extends BasicActivity {
                                 MemberInfo memberInfo = new MemberInfo(name,phonenum,birthday,address,downloadUri.toString());
                                 storeUploader(memberInfo);
                             } else {
-                                Toast.makeText(getApplicationContext(), "회원정보를 보내는데 실패하였습니다.", Toast.LENGTH_LONG).show();
+
+                                showToast(MemberInitActivity.this,"회원정보를 보내는데 실패하였습니다.");
+                                //Toast.makeText(getApplicationContext(), "회원정보를 보내는데 실패하였습니다.", Toast.LENGTH_LONG).show();
                                 Log.e("로그","실패");
                             }
                         }
@@ -157,7 +161,8 @@ public class MemberInitActivity extends BasicActivity {
                 }
             }
         }else {
-            Toast.makeText(getApplicationContext(), "회원정보를 입력해주세요.", Toast.LENGTH_LONG).show();
+            showToast(MemberInitActivity.this,"회원정보를 입력해주세요.");
+           // Toast.makeText(getApplicationContext(), "회원정보를 입력해주세요.", Toast.LENGTH_LONG).show();
         }
     }
 
@@ -167,7 +172,8 @@ public class MemberInitActivity extends BasicActivity {
                 .addOnSuccessListener(new OnSuccessListener<Void>() {          //성공 했을때 - 토스트로 알려주고 싶어서서
                     @Override
                     public void onSuccess(Void aVoid) {
-                        Toast.makeText(getApplicationContext(), "회원정보 등록을 성공하였습니다.", Toast.LENGTH_LONG).show();
+                        showToast(MemberInitActivity.this,"회원정보 등록을 성공하였습니다.");
+                       // Toast.makeText(getApplicationContext(), "회원정보 등록을 성공하였습니다.", Toast.LENGTH_LONG).show();
                         loaderLayout.setVisibility(View.GONE);
                         finish();
                     }
@@ -175,7 +181,8 @@ public class MemberInitActivity extends BasicActivity {
                 .addOnFailureListener(new OnFailureListener() {         //실패 했을때 - 토스트로 알려주고 싶어서서
                     @Override
                     public void onFailure(@NonNull Exception e) {
-                        Toast.makeText(getApplicationContext(), "회원정보 등록을 실패하였습니다.", Toast.LENGTH_LONG).show();
+                        showToast(MemberInitActivity.this,"회원정보 등록을 실패하였습니다.");
+                        //Toast.makeText(getApplicationContext(), "회원정보 등록을 실패하였습니다.", Toast.LENGTH_LONG).show();
                         loaderLayout.setVisibility(View.GONE);
                         Log.w(TAG, "Error writing document", e);
                     }

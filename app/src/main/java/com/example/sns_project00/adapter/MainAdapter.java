@@ -2,7 +2,6 @@ package com.example.sns_project00.adapter;
 
 import android.app.Activity;
 import android.graphics.Color;
-import android.util.Patterns;
 import android.view.LayoutInflater;
 import android.view.MenuInflater;
 import android.view.MenuItem;
@@ -25,6 +24,8 @@ import com.example.sns_project00.listener.OnPostListener;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Locale;
+
+import static com.example.sns_project00.Util.isStorageUrl;
 
 public class MainAdapter extends RecyclerView.Adapter<MainAdapter.MainViewHolder> {
     private ArrayList<PostInfo> mDataset;
@@ -108,7 +109,7 @@ public class MainAdapter extends RecyclerView.Adapter<MainAdapter.MainViewHolder
 
                 }
                 String contents = contentsList.get(i);
-                if (Patterns.WEB_URL.matcher(contents).matches() && contents.contains("https://firebasestorage.googleapis.com/v0/b/sns-project00.appspot.com/o/posts")) {  //1.URL인지를 검사 하는 방법 && 2.URL 경로가 맞는지 검사
+                if (isStorageUrl(contents)) {  //1.URL인지를 검사 하는 방법 && 2.URL 경로가 맞는지 검사
                     ImageView imageView = new ImageView(activity);
                     imageView.setLayoutParams(layoutParams);
                     imageView.setAdjustViewBounds(true); //사진 비율이 맞춰진다

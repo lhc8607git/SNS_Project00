@@ -13,6 +13,8 @@ import com.google.android.gms.tasks.OnCompleteListener;
 import com.google.android.gms.tasks.Task;
 import com.google.firebase.auth.FirebaseAuth;
 
+import static com.example.sns_project00.Util.showToast;
+
 public class PasswordResetActivity extends BasicActivity {
     //private static final String TAG = "PasswordResetActivity";
     private FirebaseAuth mAuth;
@@ -52,13 +54,15 @@ public class PasswordResetActivity extends BasicActivity {
                         public void onComplete(@NonNull Task<Void> task) {
                             loaderLayout.setVisibility(View.GONE);
                             if (task.isSuccessful()) {
-                                startToast("이메일을 보냈습니다.");
+                                showToast(PasswordResetActivity.this,"이메일을 보냈습니다.");
+                                //startToast("이메일을 보냈습니다.");
                             }
                         }
                     });
 
         } else {
-            Toast.makeText(getApplicationContext(), "이메일을 입력해 주세요.", Toast.LENGTH_LONG).show();
+            showToast(PasswordResetActivity.this,"이메일을 입력해 주세요.");
+          //  Toast.makeText(getApplicationContext(), "이메일을 입력해 주세요.", Toast.LENGTH_LONG).show();
         }
     }
 
