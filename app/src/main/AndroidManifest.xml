@@ -40,6 +40,8 @@
         <activity android:name=".activity.BasicActivity"/>   <!-- 8. BasicActivty.java는 android화면 (세로 , 가로 중에 세로 ) 고정 할려고. -->
 
         <activity android:name=".activity.WritePostActivity"/> <!-- 9. -->
+
+        <activity android:name=".activity.PostActivity"/> <!-- 10. 게시글 액티비티-->
     </application>
 
 </manifest>

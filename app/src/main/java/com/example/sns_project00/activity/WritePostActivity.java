@@ -4,10 +4,8 @@ import android.app.Activity;
 import android.content.Intent;
 import android.net.Uri;
 import android.os.Bundle;
-import android.text.InputType;
 import android.util.Log;
 import android.view.View;
-import android.view.ViewGroup;
 import android.widget.EditText;
 import android.widget.ImageView;
 import android.widget.LinearLayout;
@@ -101,7 +99,7 @@ public class WritePostActivity extends BasicActivity {
                     String profilePath = data.getStringExtra("profilePath");
                     pathList.add(profilePath);
 
-                    /*
+                    /*     -->ContentsItemView.java에가가 만듬
                     ViewGroup.LayoutParams layoutParams = new ViewGroup.LayoutParams(ViewGroup.LayoutParams.MATCH_PARENT, ViewGroup.LayoutParams.WRAP_CONTENT);
                     LinearLayout linearLayout = new LinearLayout(WritePostActivity.this);
                     linearLayout.setLayoutParams(layoutParams);
@@ -120,6 +118,19 @@ public class WritePostActivity extends BasicActivity {
                             }
                         }
                     }
+
+                    contentsItemView.setImage(profilePath);
+                    contentsItemView.setOnClickListener(new View.OnClickListener() {
+                        @Override
+                        public void onClick(View v) {
+                            buttonsBackgroundLayout.setVisibility(View.VISIBLE);
+                            selectedImageView=(ImageView)v;  //선택이 되었을 때 전역으로 저장하는 곳
+
+                        }
+                    });
+
+                    contentsItemView.setOnFocusChangeListener(onFocusChangeListener);
+
                     /*
                     ImageView imageView = new ImageView(WritePostActivity.this);
                     imageView.setLayoutParams(layoutParams);
@@ -182,13 +193,16 @@ public class WritePostActivity extends BasicActivity {
                     buttonsBackgroundLayout.setVisibility(View.GONE);
                     break;
                 case R.id.delete:
-                    View selectedView = (View)selectedImageView.getParent();
+                    final View selectedView = (View)selectedImageView.getParent();
 
                     StorageReference desertRef = storageRef.child("posts/"+postInfo.getId()+"/"+storageUrlToName(pathList.get(parent.indexOfChild(selectedView)-1)));
                     desertRef.delete().addOnSuccessListener(new OnSuccessListener<Void>() {
                         @Override
                         public void onSuccess(Void aVoid) {
                             showToast(WritePostActivity.this,"파일을 삭제 하였습니다.");
+                            pathList.remove(parent.indexOfChild(selectedView)-1);//이 뷰가 parent의 몇번째에 있는 자식인지 알아온다
+                            parent.removeView(selectedView); //getParent()하면 부모뷰에 접근을 한다.
+                            buttonsBackgroundLayout.setVisibility(View.GONE);
                         }
                     }).addOnFailureListener(new OnFailureListener() {
                         @Override
@@ -197,9 +211,6 @@ public class WritePostActivity extends BasicActivity {
                         }
                     });
 
-                    pathList.remove(parent.indexOfChild(selectedView)-1);//이 뷰가 parent의 몇번째에 있는 자식인지 알아온다
-                    parent.removeView(selectedView); //getParent()하면 부모뷰에 접근을 한다.
-                    buttonsBackgroundLayout.setVisibility(View.GONE);
                     break;
 
             }
@@ -292,7 +303,7 @@ public class WritePostActivity extends BasicActivity {
 
 
     private void storeUpload(DocumentReference documentReference, PostInfo postInfo) {
-        documentReference.set(postInfo)
+        documentReference.set(postInfo.getPostInfo())
                 .addOnSuccessListener(new OnSuccessListener<Void>() {
                     @Override
                     public void onSuccess(Void aVoid) {
@@ -318,18 +329,12 @@ public class WritePostActivity extends BasicActivity {
                 String contents = contentsList.get(i);
                 if (isStorageUrl(contents)) {  //1.URL인지를 검사 하는 방법 && 2.URL 경로가 맞는지 검사
                     pathList.add(contents);
+                    ContentsItemView contentsItemView=new ContentsItemView(this);
+                    parent.addView(contentsItemView);
 
-                    ViewGroup.LayoutParams layoutParams = new ViewGroup.LayoutParams(ViewGroup.LayoutParams.MATCH_PARENT, ViewGroup.LayoutParams.WRAP_CONTENT);
-                    LinearLayout linearLayout = new LinearLayout(WritePostActivity.this);
-                    linearLayout.setLayoutParams(layoutParams);
-                    linearLayout.setOrientation(LinearLayout.VERTICAL);
-                    parent.addView(linearLayout);
 
-                    ImageView imageView = new ImageView(WritePostActivity.this);
-                    imageView.setLayoutParams(layoutParams);
-                    imageView.setAdjustViewBounds(true);
-                    imageView.setScaleType(ImageView.ScaleType.FIT_XY);
-                    imageView.setOnClickListener(new View.OnClickListener() {
+                    contentsItemView.setImage(contents);
+                    contentsItemView.setOnClickListener(new View.OnClickListener() {
                         @Override
                         public void onClick(View v) {
                             buttonsBackgroundLayout.setVisibility(View.VISIBLE);
@@ -337,21 +342,14 @@ public class WritePostActivity extends BasicActivity {
 
                         }
                     });
-                    Glide.with(this).load(contents).override(1000).into(imageView); //image리사이징(외부 라이브러리)
-                    linearLayout.addView(imageView);
 
-                    EditText editText = new EditText(WritePostActivity.this);
-                    editText.setLayoutParams(layoutParams);
-                    editText.setInputType(InputType.TYPE_TEXT_FLAG_MULTI_LINE | InputType.TYPE_CLASS_TEXT);
-                    editText.setHint("내용");
+                    contentsItemView.setOnFocusChangeListener(onFocusChangeListener);
                     if(i<contentsList.size()-1){
                         String nextContents =contentsList.get(i+1);
-                        if(!isStorageUrl(contents)){
-                            editText.setText(nextContents);
+                        if(!isStorageUrl(nextContents)){
+                            contentsItemView.setText(nextContents);
                         }
                     }
-                    editText.setOnFocusChangeListener(onFocusChangeListener);
-                    linearLayout.addView(editText);
                 }else if(i==0){
                     contentsEditText.setText(contents);
                 }

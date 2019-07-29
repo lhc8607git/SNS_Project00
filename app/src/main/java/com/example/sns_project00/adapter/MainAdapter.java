@@ -1,6 +1,7 @@
 package com.example.sns_project00.adapter;
 
 import android.app.Activity;
+import android.content.Intent;
 import android.graphics.Color;
 import android.view.LayoutInflater;
 import android.view.MenuInflater;
@@ -19,6 +20,7 @@ import androidx.recyclerview.widget.RecyclerView;
 import com.bumptech.glide.Glide;
 import com.example.sns_project00.PostInfo;
 import com.example.sns_project00.R;
+import com.example.sns_project00.activity.PostActivity;
 import com.example.sns_project00.listener.OnPostListener;
 
 import java.text.SimpleDateFormat;
@@ -64,6 +66,9 @@ public class MainAdapter extends RecyclerView.Adapter<MainAdapter.MainViewHolder
         cardView.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
+                Intent intent=new Intent(activity, PostActivity.class);
+                intent.putExtra("postInfo",mDataset.get(mainViewHolder.getAdapterPosition()));
+                activity.startActivity(intent);
             }
         });
 
