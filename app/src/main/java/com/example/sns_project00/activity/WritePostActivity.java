@@ -35,6 +35,10 @@ import java.io.InputStream;
 import java.util.ArrayList;
 import java.util.Date;
 
+import static com.example.sns_project00.Util.GALLERY_IMAGE;
+import static com.example.sns_project00.Util.GALLERY_VIDEO;
+import static com.example.sns_project00.Util.INTENT_MEDIA;
+import static com.example.sns_project00.Util.INTENT_PATH;
 import static com.example.sns_project00.Util.isStorageUrl;
 import static com.example.sns_project00.Util.showToast;
 import static com.example.sns_project00.Util.storageUrlToName;
@@ -96,8 +100,8 @@ public class WritePostActivity extends BasicActivity {
         switch (requestCode) {
             case 0:                                                        //myStartActivity메소드에서 requestCode를 0으로 보낸다고 해서
                 if (resultCode == Activity.RESULT_OK) {
-                    String profilePath = data.getStringExtra("profilePath");
-                    pathList.add(profilePath);
+                    String path = data.getStringExtra(INTENT_PATH);
+                    pathList.add(path);
 
                     /*     -->ContentsItemView.java에가가 만듬
                     ViewGroup.LayoutParams layoutParams = new ViewGroup.LayoutParams(ViewGroup.LayoutParams.MATCH_PARENT, ViewGroup.LayoutParams.WRAP_CONTENT);
@@ -119,7 +123,7 @@ public class WritePostActivity extends BasicActivity {
                         }
                     }
 
-                    contentsItemView.setImage(profilePath);
+                    contentsItemView.setImage(path);
                     contentsItemView.setOnClickListener(new View.OnClickListener() {
                         @Override
                         public void onClick(View v) {
@@ -144,7 +148,7 @@ public class WritePostActivity extends BasicActivity {
 
                         }
                     });
-                    Glide.with(this).load(profilePath).override(1000).into(imageView); //image리사이징(외부 라이브러리)
+                    Glide.with(this).load(path).override(1000).into(imageView); //image리사이징(외부 라이브러리)
                     linearLayout.addView(imageView);
 
                     EditText editText = new EditText(WritePostActivity.this);
@@ -158,9 +162,9 @@ public class WritePostActivity extends BasicActivity {
                 break;
             case 1:
                 if (resultCode == Activity.RESULT_OK) {
-                    String profilePath = data.getStringExtra("profilePath");
-                    pathList.set(parent.indexOfChild((View)selectedImageView.getParent())-1,profilePath);//이 뷰가 parent의 몇번째에 있는 자식인지 알아온다
-                    Glide.with(this).load(profilePath).override(1000).into(selectedImageView);  //selectedImageView(선택한 이미지뷰만 바꿔주면 되겠찌?)
+                    String path = data.getStringExtra(INTENT_PATH);
+                    pathList.set(parent.indexOfChild((View)selectedImageView.getParent())-1,path);//이 뷰가 parent의 몇번째에 있는 자식인지 알아온다
+                    Glide.with(this).load(path).override(1000).into(selectedImageView);  //selectedImageView(선택한 이미지뷰만 바꿔주면 되겠찌?)
                 }
                 break;
         }
@@ -174,10 +178,10 @@ public class WritePostActivity extends BasicActivity {
                     storageUpload();
                     break;
                 case R.id.image:
-                    myStartActivity(GalleryActivity.class, "image",0);
+                    myStartActivity(GalleryActivity.class, GALLERY_IMAGE,0);
                     break;
                 case R.id.video:
-                    myStartActivity(GalleryActivity.class, "video",0);
+                    myStartActivity(GalleryActivity.class, GALLERY_VIDEO,0);
                     break;
                 case R.id.buttonsBackgroundLayout:
                     if (buttonsBackgroundLayout.getVisibility() == View.VISIBLE) {
@@ -185,11 +189,11 @@ public class WritePostActivity extends BasicActivity {
                     }
                     break;
                 case R.id.imageModify:
-                    myStartActivity(GalleryActivity.class, "image",1);
+                    myStartActivity(GalleryActivity.class, GALLERY_IMAGE,1);
                     buttonsBackgroundLayout.setVisibility(View.GONE);
                     break;
                 case R.id.videoModify:
-                    myStartActivity(GalleryActivity.class, "video",1);
+                    myStartActivity(GalleryActivity.class, GALLERY_VIDEO,1);
                     buttonsBackgroundLayout.setVisibility(View.GONE);
                     break;
                 case R.id.delete:
@@ -357,9 +361,9 @@ public class WritePostActivity extends BasicActivity {
         }
     }
 
-    private void myStartActivity(Class c, String media,int requestCode) {
+    private void myStartActivity(Class c, int media,int requestCode) {
         Intent intent = new Intent(this, c);  //클래스로 받는 걸로 바꿈.  <- Intent intent=new Intent(this, MainActivity.class);
-        intent.putExtra("media", media); //값 전달
+        intent.putExtra(INTENT_MEDIA, media); //값 전달
         startActivityForResult(intent, requestCode);  //사진 찍은 거 . 결과 받아야하니깐 startActivityForResult 사용함
     }
 

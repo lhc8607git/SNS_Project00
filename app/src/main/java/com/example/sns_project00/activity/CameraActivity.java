@@ -21,7 +21,6 @@ import android.content.Intent;
 import android.media.Image;
 import android.media.ImageReader;
 import android.os.Bundle;
-import android.util.Log;
 
 import com.example.sns_project00.R;
 import com.example.sns_project00.fragment.Camera2BasicFragment;
@@ -30,6 +29,8 @@ import java.io.File;
 import java.io.FileOutputStream;
 import java.io.IOException;
 import java.nio.ByteBuffer;
+
+import static com.example.sns_project00.Util.INTENT_PATH;
 
 public class CameraActivity extends BasicActivity {
     private Camera2BasicFragment camera2BasicFragment;         //카메라Flagment를 전역으로 해주고
@@ -44,9 +45,6 @@ public class CameraActivity extends BasicActivity {
 
         @Override
         public void onImageAvailable(ImageReader reader) {  //사진기에서 캡쳐누르면 발생하는 곳
-           // mBackgroundHandler.post(new Camera2BasicFragment.ImageUpLoader(reader.acquireNextImage()));
-            Log.e("로그","캡쳐");
-
             Image mImage = reader.acquireNextImage();
             File mFile = new File(getExternalFilesDir(null), "profileImage.jpg");
 
@@ -70,9 +68,9 @@ public class CameraActivity extends BasicActivity {
                 }
             }
             // 값을 전해주고 꺼버림            (MemberInitActivity.java로 결과를 보내줌.)
-            Intent resultIntent = new Intent();
-            resultIntent.putExtra("profilePath",mFile.toString());   //결과보내는게 File타입이 없어서 일딴 문자로 보낸거다.
-            setResult(Activity.RESULT_OK,resultIntent);
+            Intent intent = new Intent();
+            intent.putExtra(INTENT_PATH,mFile.toString());   //결과보내는게 File타입이 없어서 일딴 문자로 보낸거다.
+            setResult(Activity.RESULT_OK,intent);
 
             camera2BasicFragment.closeCamera(); //하... 사용했으면...카메라도 종료해줘야한다!!!★★★★★★★★★★
             finish();

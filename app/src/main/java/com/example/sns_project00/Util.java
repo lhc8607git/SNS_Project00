@@ -7,12 +7,26 @@ import android.widget.Toast;
 public class Util {
     public Util(){  }
 
+    //path
+    public static final String INTENT_PATH="path";
+
+    //media
+    public static final String INTENT_MEDIA="media";
+
+    //이미지, 비디오 정의
+    public static final int GALLERY_IMAGE=0;
+    public static final int GALLERY_VIDEO=1;
+
+    //토스트
     public static void showToast(Activity activity,String msg){
         Toast.makeText(activity,msg,Toast.LENGTH_LONG).show();
     }
+
+    //url 위치 , 맞는지
     public static boolean isStorageUrl(String url){
         return Patterns.WEB_URL.matcher(url).matches() && url.contains("https://firebasestorage.googleapis.com/v0/b/sns-project00.appspot.com/o/posts");
     }
+
 
     public static String storageUrlToName(String url){
 //        String[] list =url.split("\\?");

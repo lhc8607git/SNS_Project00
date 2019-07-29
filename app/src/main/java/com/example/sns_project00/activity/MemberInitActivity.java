@@ -35,6 +35,7 @@ import java.io.FileInputStream;
 import java.io.FileNotFoundException;
 import java.io.InputStream;
 
+import static com.example.sns_project00.Util.INTENT_PATH;
 import static com.example.sns_project00.Util.showToast;
 
 public class MemberInitActivity extends BasicActivity {
@@ -71,7 +72,7 @@ public class MemberInitActivity extends BasicActivity {
         switch (requestCode){
             case 0 :{                                                                  //myStartActivity메소드에서 requestCode를 0으로 보낸다고 해서
                 if(resultCode == Activity.RESULT_OK){
-                    profilePath = data.getStringExtra("profilePath");
+                    profilePath = data.getStringExtra(INTENT_PATH);
                     Log.e("로그","profilePath: "+ profilePath);               //지워도됨.....찍은 사진의 저장된 위치 알려고
 //                    image리사이징(외부 라이브러리)를 사용하기 때문에 밑에 2줄을 사용하지 않기 때문에 주석 닮.
 //                    Bitmap bmp = BitmapFactory.decodeFile(profilePath);                 //저장된 사진의 위치가 String으로 되어 있어서 Bitmap으로 디코더파일을 해서 이미지로 바꿔준다!!!

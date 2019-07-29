@@ -20,6 +20,9 @@ import com.example.sns_project00.adapter.GalleryAdapter;
 
 import java.util.ArrayList;
 
+import static com.example.sns_project00.Util.GALLERY_IMAGE;
+import static com.example.sns_project00.Util.GALLERY_VIDEO;
+import static com.example.sns_project00.Util.INTENT_MEDIA;
 import static com.example.sns_project00.Util.showToast;
 
 public class GalleryActivity extends BasicActivity {
@@ -40,7 +43,7 @@ public class GalleryActivity extends BasicActivity {
             if (ActivityCompat.shouldShowRequestPermissionRationale(GalleryActivity.this,
                     Manifest.permission.READ_EXTERNAL_STORAGE)) {
             } else {
-                showToast(GalleryActivity.this,"권한을 허용해 주세요.");
+                showToast(GalleryActivity.this,getResources().getString(R.string.please_grant_permission));     //"권한을 허용해 주세요." -> 바꿈 getResources().getString(R.string.please_grant_permission)
                 //Toast.makeText(getApplicationContext(),"권한을 허용해 주세요.",Toast.LENGTH_LONG).show();
             }
         }else{                                                                  //권한이 있을때
@@ -59,7 +62,7 @@ public class GalleryActivity extends BasicActivity {
                     recyclerInit();
                 } else {
                     finish();
-                    showToast(GalleryActivity.this,"권한을 허용해 주세요.");
+                    showToast(GalleryActivity.this,getResources().getString(R.string.please_grant_permission));
                     //Toast.makeText(getApplicationContext(),"권한을 허용해 주세요.",Toast.LENGTH_LONG).show();
                 }
             }
@@ -87,7 +90,8 @@ public class GalleryActivity extends BasicActivity {
         String[] projection; //핸드폰에 있는 비디오,앨범 넣을 배열
 
         Intent intent=getIntent();
-        if(intent.getStringExtra("media").equals("video")){
+        final int media = intent.getIntExtra(INTENT_MEDIA,GALLERY_IMAGE); //값을 못 넘겨주면 "GALLERY_IMAGE" 이걸로 보내겠다고 적어줌.
+        if(media == GALLERY_VIDEO){  //if안에 이거 였는데 바꿈 . intent.getStringExtra("media").equals("video")
             uri = android.provider.MediaStore.Video.Media.EXTERNAL_CONTENT_URI;    //비디오버튼누르면  비디오 갤러리화면 보이고
             projection = new String[]{ MediaStore.MediaColumns.DATA,MediaStore.Video.Media.BUCKET_DISPLAY_NAME };
         }else {                                                                    //아니면(이미지버튼누르면) 사진 갤러리화면 보인다.
