@@ -9,7 +9,7 @@
 <img src="https://github.com/bumptech/glide/blob/master/static/glide_logo.png?raw=true" width="300" height="100">
 
 - 구성<br>
- 1.회원가입
+ 1.회원가입<br>
   이메일, 비밀번호, 비밀번호 확인, 이름, 성별, 나이, 사진
  2.로그인
   이메일, 비밀번호
