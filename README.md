@@ -9,19 +9,19 @@
 <img src="https://github.com/bumptech/glide/blob/master/static/glide_logo.png?raw=true" width="300" height="100">
 
 - 구성<br>
- 1.회원가입<br>
+ 1.회원가입ok<br>
    이메일, 비밀번호, 비밀번호 확인, 이름, 성별, 나이, 사진<br>
- 2.로그인<br>
+ 2.로그인ok<br>
    이메일, 비밀번호<br>
  3.비밀번호 찾기<br>
    이메일<br>
- 4.게시글 리스트<br>
+ 4.게시글 리스트ok<br>
    게시글 아이템(리스트 안의 각각각 화면)<br>
- 5.게시글<br>
+ 5.게시글ok<br>
    제목, 내용, 댓글, 좋아요, 싫어요<br>
- 6.게시글 작성<br>
+ 6.게시글 작성ok<br>
    제목, 내용, 태그<br>
- 7.게시글 수정<br>
+ 7.게시글 수정ok<br>
    제목, 내용, 태그<br>
  8.내 정보<br>
    이메일, 이름, 성별, 나이, 사진<br>
