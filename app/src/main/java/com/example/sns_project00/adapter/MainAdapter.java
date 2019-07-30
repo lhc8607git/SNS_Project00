@@ -2,13 +2,11 @@ package com.example.sns_project00.adapter;
 
 import android.app.Activity;
 import android.content.Intent;
-import android.graphics.Color;
 import android.view.LayoutInflater;
 import android.view.MenuInflater;
 import android.view.MenuItem;
 import android.view.View;
 import android.view.ViewGroup;
-import android.widget.ImageView;
 import android.widget.LinearLayout;
 import android.widget.PopupMenu;
 import android.widget.TextView;
@@ -17,22 +15,21 @@ import androidx.annotation.NonNull;
 import androidx.cardview.widget.CardView;
 import androidx.recyclerview.widget.RecyclerView;
 
-import com.bumptech.glide.Glide;
+import com.example.sns_project00.FirebaseHelper;
 import com.example.sns_project00.PostInfo;
 import com.example.sns_project00.R;
 import com.example.sns_project00.activity.PostActivity;
+import com.example.sns_project00.activity.WritePostActivity;
 import com.example.sns_project00.listener.OnPostListener;
+import com.example.sns_project00.view.ReadContentsView;
 
-import java.text.SimpleDateFormat;
 import java.util.ArrayList;
-import java.util.Locale;
-
-import static com.example.sns_project00.Util.isStorageUrl;
 
 public class MainAdapter extends RecyclerView.Adapter<MainAdapter.MainViewHolder> {
     private ArrayList<PostInfo> mDataset;
     private Activity activity;
-    private OnPostListener onPostListener;
+    private FirebaseHelper firebaseHelper;
+    private final int MORE_INDEX=2;  //나중에 더보기 더 늘리고 싶으면 여기서 바꿔주면 됨-----------------------------------
 
     static class MainViewHolder extends RecyclerView.ViewHolder {
         // each data item is just a string in this case
@@ -47,11 +44,15 @@ public class MainAdapter extends RecyclerView.Adapter<MainAdapter.MainViewHolder
     public MainAdapter(Activity activity, ArrayList<PostInfo> myDataset) {
         this.mDataset = myDataset;
         this.activity=activity;
+
+        firebaseHelper = new FirebaseHelper(activity);
+
     }
 
     public void setOnPostListener(OnPostListener onPostListener){
-        this.onPostListener=onPostListener;
+        firebaseHelper.setOnPostListener(onPostListener);
     }
+
 
     @Override
     public int getItemViewType(int position){
@@ -85,50 +86,25 @@ public class MainAdapter extends RecyclerView.Adapter<MainAdapter.MainViewHolder
 
     @Override
     public void onBindViewHolder(@NonNull final MainViewHolder holder, int position) {
-
         CardView cardView = holder.cardView;
         TextView titleTextView =cardView.findViewById(R.id.titleTextView);
-        titleTextView.setText(mDataset.get(position).getTitle());
 
-        TextView createdAtTextView =cardView.findViewById(R.id.createAtTextView);
-        createdAtTextView.setText(new SimpleDateFormat("yyyy-MM-dd", Locale.getDefault()).format(mDataset.get(position).getCreatedAt()));
-//(바로 밑코드) image리사이징(외부 라이브러리)로 바꿈  <지워두됨>
+        PostInfo postInfo=mDataset.get(position);
+        titleTextView.setText(postInfo.getTitle());
+
+        ReadContentsView readContentsView=cardView.findViewById(R.id.readContentsView);
+//       image리사이징(외부 라이브러리)로 바꿈  <지워두됨>
 //        Bitmap bmp = BitmapFactory.decodeFile(mDataset.get(position));         //저장된 사진의 위치가 ImageView로 되어 있어서 ★Bitmap으로 디코더파일★을 해서 이미지로 바꿔준다!!!
 //        imageView.setImageBitmap(bmp);
-
         LinearLayout contentsLayout = cardView.findViewById(R.id.contentsLayout);
-        ViewGroup.LayoutParams layoutParams = new ViewGroup.LayoutParams(ViewGroup.LayoutParams.MATCH_PARENT, ViewGroup.LayoutParams.WRAP_CONTENT);  //여기다가 컨텐츠를 넣어주면된다
-        ArrayList<String> contentsList = mDataset.get(position).getContents();
 
-        if(contentsLayout.getTag()==null || !contentsLayout.getTag().equals(contentsList)){
-            contentsLayout.setTag(contentsList);
+
+        if(contentsLayout.getTag()==null || !contentsLayout.getTag().equals(postInfo)){
+            contentsLayout.setTag(postInfo);
             contentsLayout.removeAllViews();
-            final int MORE_INDEX=2;
-            for (int i = 0; i < contentsList.size(); i++) {
-                if(i==MORE_INDEX){  //리스트에 추가할때 : 내용(작성하고),사진넣고,내용(또작성하고)   이렇게 하면 3개 잖아!!.  보여주는게 3개니깐. 이것을 "더보기.."로 대체한다는 코드이다.
-                    TextView textView = new TextView(activity);
-                    textView.setLayoutParams(layoutParams);
-                    textView.setText("더보기..");
-                    contentsLayout.addView(textView);
-                    break;
 
-                }
-                String contents = contentsList.get(i);
-                if (isStorageUrl(contents)) {  //1.URL인지를 검사 하는 방법 && 2.URL 경로가 맞는지 검사
-                    ImageView imageView = new ImageView(activity);
-                    imageView.setLayoutParams(layoutParams);
-                    imageView.setAdjustViewBounds(true); //사진 비율이 맞춰진다
-                    imageView.setScaleType(ImageView.ScaleType.FIT_XY);
-                    contentsLayout.addView(imageView);
-                    Glide.with(activity).load(contents).override(1000).thumbnail(0.1f).into(imageView); //image리사이징(외부 라이브러리)
-                } else {
-                    TextView textView = new TextView(activity);
-                    textView.setLayoutParams(layoutParams);
-                    textView.setText(contents);
-                    textView.setTextColor(Color.rgb(0,0,0));
-                    contentsLayout.addView(textView);
-                }
-            }
+            readContentsView.setMoreIndex(MORE_INDEX);
+            readContentsView.setPostInfo(postInfo);
         }
     }
 
@@ -144,10 +120,10 @@ public class MainAdapter extends RecyclerView.Adapter<MainAdapter.MainViewHolder
             public boolean onMenuItemClick(MenuItem menuItem) {
                 switch (menuItem.getItemId()) {
                     case R.id.modify:
-                        onPostListener.onModify(position);
+                        myStartActivity(WritePostActivity.class,mDataset.get(position));
                         return true;
                     case R.id.delete:
-                        onPostListener.onDelete(position);
+                        firebaseHelper.storageDelete(mDataset.get(position));
                         return true;
                     default:
                         return false;
@@ -157,6 +133,15 @@ public class MainAdapter extends RecyclerView.Adapter<MainAdapter.MainViewHolder
         MenuInflater inflater = popup.getMenuInflater();
         inflater.inflate(R.menu.post, popup.getMenu());
         popup.show();
+    }
+
+
+
+    private void myStartActivity(Class c,PostInfo postInfo){
+        Intent intent=new Intent(activity, c);  //클래스로 받는 걸로 바꿈.  <- Intent intent=new Intent(this, MainActivity.class);
+        intent.putExtra("postInfo",postInfo);
+        // intent.setFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP);   //뒤로가기 할때 깨끗하게
+        activity.startActivity(intent);
     }
 
 }

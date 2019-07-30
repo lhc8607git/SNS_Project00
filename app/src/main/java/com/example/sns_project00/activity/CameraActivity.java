@@ -81,6 +81,7 @@ public class CameraActivity extends BasicActivity {
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_camera);
+        setToolbarTitle(getResources().getString(R.string.app_name)); //액션바 이름 (strings.xml에 정의 된 앱이름으로 설정)
         if (null == savedInstanceState) {
             camera2BasicFragment = new Camera2BasicFragment();     //사용
             camera2BasicFragment.setOnImageAvailableListener(mOnImageAvailableListener);  //사용

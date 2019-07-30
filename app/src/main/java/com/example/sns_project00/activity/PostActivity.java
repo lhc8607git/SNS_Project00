@@ -1,63 +1,99 @@
 package com.example.sns_project00.activity;
 
-import android.graphics.Color;
+import android.app.Activity;
+import android.content.Intent;
 import android.os.Bundle;
-import android.view.ViewGroup;
-import android.widget.ImageView;
+import android.util.Log;
+import android.view.Menu;
+import android.view.MenuItem;
 import android.widget.LinearLayout;
-import android.widget.TextView;
 
-import com.bumptech.glide.Glide;
+import com.example.sns_project00.FirebaseHelper;
 import com.example.sns_project00.PostInfo;
 import com.example.sns_project00.R;
-
-import java.text.SimpleDateFormat;
-import java.util.ArrayList;
-import java.util.Locale;
-
-import static com.example.sns_project00.Util.isStorageUrl;
+import com.example.sns_project00.listener.OnPostListener;
+import com.example.sns_project00.view.ReadContentsView;
 
 public class PostActivity extends BasicActivity {
+    private PostInfo postInfo;
+    private FirebaseHelper firebaseHelper;
+    private  ReadContentsView readContentsView;
+    private LinearLayout contentsLayout;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_post);
 
-        PostInfo postInfo=(PostInfo)getIntent().getSerializableExtra("postInfo");
-        TextView titleTextView =findViewById(R.id.titleTextView);
-        titleTextView.setText(postInfo.getTitle());
+        postInfo=(PostInfo)getIntent().getSerializableExtra("postInfo");
 
-        TextView createdAtTextView =findViewById(R.id.createAtTextView);
-        createdAtTextView.setText(new SimpleDateFormat("yyyy-MM-dd", Locale.getDefault()).format(postInfo.getCreatedAt()));
-//(바로 밑코드) image리사이징(외부 라이브러리)로 바꿈  <지워두됨>
-//        Bitmap bmp = BitmapFactory.decodeFile(postInfo);         //저장된 사진의 위치가 ImageView로 되어 있어서 ★Bitmap으로 디코더파일★을 해서 이미지로 바꿔준다!!!
-//        imageView.setImageBitmap(bmp);
 
-        LinearLayout contentsLayout = findViewById(R.id.contentsLayout);
-        ViewGroup.LayoutParams layoutParams = new ViewGroup.LayoutParams(ViewGroup.LayoutParams.MATCH_PARENT, ViewGroup.LayoutParams.WRAP_CONTENT);  //여기다가 컨텐츠를 넣어주면된다
-        ArrayList<String> contentsList = postInfo.getContents();
+        contentsLayout = findViewById(R.id.contentsLayout);
+        readContentsView =findViewById(R.id.readContentsView);
 
-        if(contentsLayout.getTag()==null || !contentsLayout.getTag().equals(contentsList)){
-            contentsLayout.setTag(contentsList);
-            contentsLayout.removeAllViews();
-            for (int i = 0; i < contentsList.size(); i++) {
-                String contents = contentsList.get(i);
-                if (isStorageUrl(contents)) {  //1.URL인지를 검사 하는 방법 && 2.URL 경로가 맞는지 검사
-                    ImageView imageView = new ImageView(this);
-                    imageView.setLayoutParams(layoutParams);
-                    imageView.setAdjustViewBounds(true); //사진 비율이 맞춰진다
-                    imageView.setScaleType(ImageView.ScaleType.FIT_XY);
-                    contentsLayout.addView(imageView);
-                    Glide.with(this).load(contents).override(1000).thumbnail(0.1f).into(imageView); //image리사이징(외부 라이브러리)
-                } else {
-                    TextView textView = new TextView(this);
-                    textView.setLayoutParams(layoutParams);
-                    textView.setText(contents);
-                    textView.setTextColor(Color.rgb(0,0,0));
-                    contentsLayout.addView(textView);
+        firebaseHelper = new FirebaseHelper(this);
+        firebaseHelper.setOnPostListener(onPostListener);
+
+        uiUpdate();
+    }
+
+
+    @Override       //일딴 ,,,,,,,,, 값을 확인하는곳?  받는 곳?
+    public void onActivityResult(int requestCode, int resultCode, Intent data) {
+        super.onActivityResult(requestCode, resultCode, data);
+        switch (requestCode) {
+            case 0:
+                if (resultCode == Activity.RESULT_OK) {
+                    postInfo =(PostInfo)data.getSerializableExtra("postinfo");
+                    contentsLayout.removeAllViews();
+                    uiUpdate();
                 }
-            }
+                break;
         }
+    }
+
+
+    @Override
+    public boolean onCreateOptionsMenu(Menu menu) {       //땡땡땡 메뉴 버튼 생성하는거
+        getMenuInflater().inflate(R.menu.post,menu);
+        return super.onCreateOptionsMenu(menu);
+    }
+
+    @Override
+    public boolean onOptionsItemSelected(MenuItem item) {
+        switch (item.getItemId()){
+            case R.id.delete:
+                firebaseHelper.storageDelete(postInfo);
+                return true;
+            case R.id.modify:
+                myStartActivity(WritePostActivity.class,postInfo);
+                return true;
+             default:
+                 return super.onOptionsItemSelected(item);
+        }
+    }
+
+    OnPostListener onPostListener=new OnPostListener() {
+        @Override
+        public void onDelete() {
+            Log.e("로그","삭제 성공");
+        }
+
+        @Override
+        public void onModify() {
+            Log.e("로그","수정 성공");
+        }
+    };
+
+    private void uiUpdate(){
+        setToolbarTitle(postInfo.getTitle()); //액션바 이름
+        readContentsView.setPostInfo(postInfo);
+    }
+
+    private void myStartActivity(Class c,PostInfo postInfo){
+        Intent intent=new Intent(this, c);  //클래스로 받는 걸로 바꿈.  <- Intent intent=new Intent(this, MainActivity.class);
+        intent.putExtra("postInfo",postInfo);
+        // intent.setFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP);   //뒤로가기 할때 깨끗하게
+        startActivityForResult(intent,0);
     }
 }

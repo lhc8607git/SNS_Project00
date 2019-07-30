@@ -6,6 +6,7 @@ import android.os.Bundle;
 
 
 import androidx.annotation.LayoutRes;
+import androidx.appcompat.app.ActionBar;
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.appcompat.widget.Toolbar;
 
@@ -27,5 +28,12 @@ public class BasicActivity extends AppCompatActivity {
 
         Toolbar myToolbar =findViewById(R.id.toolbar);
         setSupportActionBar(myToolbar);
+    }
+
+    public void setToolbarTitle(String title){     //툴바 사용
+        ActionBar actionBar =getSupportActionBar();
+        if(actionBar != null){
+            actionBar.setTitle(title);
+        }
     }
 }

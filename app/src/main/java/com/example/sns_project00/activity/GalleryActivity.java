@@ -31,6 +31,7 @@ public class GalleryActivity extends BasicActivity {
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_gallery);
+        setToolbarTitle("갤러리"); //액션바 이름
 
 
         //일딴, 먼저 필요한 권한부터 요청    --권한1-1(요청)

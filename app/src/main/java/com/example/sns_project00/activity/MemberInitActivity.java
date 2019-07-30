@@ -49,6 +49,7 @@ public class MemberInitActivity extends BasicActivity {
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_member_init);
+        setToolbarTitle("회원정보"); //액션바 이름
 
         loaderLayout=findViewById(R.id.loaderLayout);
         profileImageView= findViewById(R.id.profileimg);

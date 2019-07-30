@@ -15,14 +15,18 @@
         android:layout_below="@+id/toolbar">
 
         <LinearLayout
+            android:padding="10dp"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:orientation="vertical" >
+            android:orientation="vertical">
 
-            <include
-                layout="@layout/view_post"
+
+            <com.example.sns_project00.view.ReadContentsView
                 android:layout_width="match_parent"
-                android:layout_height="wrap_content" />
+                android:layout_height="wrap_content"
+                android:id="@+id/readContentsView">
+
+            </com.example.sns_project00.view.ReadContentsView>
         </LinearLayout>
     </ScrollView>
 

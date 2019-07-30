@@ -14,8 +14,6 @@ import com.example.sns_project00.R;
 import com.example.sns_project00.adapter.MainAdapter;
 import com.example.sns_project00.listener.OnPostListener;
 import com.google.android.gms.tasks.OnCompleteListener;
-import com.google.android.gms.tasks.OnFailureListener;
-import com.google.android.gms.tasks.OnSuccessListener;
 import com.google.android.gms.tasks.Task;
 import com.google.firebase.auth.FirebaseAuth;
 import com.google.firebase.auth.FirebaseUser;
@@ -26,36 +24,29 @@ import com.google.firebase.firestore.FirebaseFirestore;
 import com.google.firebase.firestore.Query;
 import com.google.firebase.firestore.QueryDocumentSnapshot;
 import com.google.firebase.firestore.QuerySnapshot;
-import com.google.firebase.storage.FirebaseStorage;
-import com.google.firebase.storage.StorageReference;
 
 import java.util.ArrayList;
 import java.util.Date;
-
-import static com.example.sns_project00.Util.isStorageUrl;
-import static com.example.sns_project00.Util.showToast;
-import static com.example.sns_project00.Util.storageUrlToName;
 
 public class MainActivity extends BasicActivity {
     private static final String TAG = "MainActivity";
     private FirebaseUser firebaseUser;
     private FirebaseFirestore firebaseFirestore;
-    private StorageReference storageRef;
     private MainAdapter mainAdapter;
     private  ArrayList<PostInfo> postList;
-    private int successCount;
+
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
 
-        getSupportActionBar().setTitle("ㅁㄴㅇㄹ");  //액션바 이름름
+        setToolbarTitle(getResources().getString(R.string.app_name)); //액션바 이름 (strings.xml에 정의 된 앱이름으로 설정)
+
+
 
        //setRequestedOrientation(ActivityInfo.SCREEN_ORIENTATION_PORTRAIT); //android 화면 (세로 모드로 고정)
         firebaseUser =FirebaseAuth.getInstance().getCurrentUser();//중복되는 곳이 있어서 --------- (그냥,참고,,, 사용자의 UID를 사용할려면 이 코드 사용 해야함)
-        FirebaseStorage storage = FirebaseStorage.getInstance();
-        storageRef = storage.getReference();
 
 
         if(firebaseUser==null){   //★ 현재 로그인된 유저가 있는지 없는지 확인 하는 부분 (만약,로그인된 유저가 없으면 로그인 화면으로 이동)---  대박 이거 지리네 로그인이 유지되네 다시 들어와도 그대로네!!! //로그인 유지??할 수 있는 거 같은데??
@@ -103,42 +94,6 @@ public class MainActivity extends BasicActivity {
     }
 
 
-    OnPostListener onPostListener=new OnPostListener() {
-        @Override
-        public void onDelete(int position) {
-            final String id=postList.get(position).getId();
-            Log.e("로그","삭제"+id);
-            ArrayList<String> contentsList = postList.get(position).getContents();
-            for (int i = 0; i < contentsList.size(); i++) {
-                String contents = contentsList.get(i);
-                if (isStorageUrl(contents)) {  //1.URL인지를 검사 하는 방법 && 2.URL 경로가 맞는지 검사
-                    successCount++;
-                    StorageReference desertRef = storageRef.child("posts/"+id+"/"+storageUrlToName(contents));
-                    desertRef.delete().addOnSuccessListener(new OnSuccessListener<Void>() {
-                        @Override
-                        public void onSuccess(Void aVoid) {
-                            successCount--;
-                            storeUploader(id);
-                        }
-                    }).addOnFailureListener(new OnFailureListener() {
-                        @Override
-                        public void onFailure(@NonNull Exception exception) {
-                            showToast(MainActivity.this,"ERROR");
-
-                        }
-                    });
-
-                }
-            }
-            storeUploader(id);
-        }
-
-        @Override
-        public void onModify(int position) {
-            myStartActivity(WritePostActivity.class,postList.get(position));
-        }
-    };
-
     View.OnClickListener onClickListener = new View.OnClickListener() {
         @Override
         public void onClick(View v) {
@@ -153,6 +108,19 @@ public class MainActivity extends BasicActivity {
                     myStartActivity(WritePostActivity.class);
                     break;
             }
+        }
+    };
+
+    OnPostListener onPostListener=new OnPostListener() {
+        @Override
+        public void onDelete() {
+            PostUpdate();
+            Log.e("로그 : ","삭제 성공");
+        }
+
+        @Override
+        public void onModify() {
+            Log.e("로그 : ","수정 성공");
         }
     };
 
@@ -184,35 +152,11 @@ public class MainActivity extends BasicActivity {
         }
     }
 
-    private void storeUploader(String id){
-        if(successCount==0) {
-            firebaseFirestore.collection("posts").document(id)
-                    .delete()
-                    .addOnSuccessListener(new OnSuccessListener<Void>() {
-                        @Override
-                        public void onSuccess(Void aVoid) {
-                          showToast(MainActivity.this,"게시글을 삭제하였습니다.");
-                            PostUpdate();
-                        }
-                    })
-                    .addOnFailureListener(new OnFailureListener() {
-                        @Override
-                        public void onFailure(@NonNull Exception e) {
-                          showToast(MainActivity.this,"게시글을 삭제하지 못했습니다.");
-                        }
-                    });
-        }
-    }
 
     private void myStartActivity(Class c){
         Intent intent=new Intent(this, c);  //클래스로 받는 걸로 바꿈.  <- Intent intent=new Intent(this, MainActivity.class);
         intent.setFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP);   //뒤로가기 할때 깨끗하게
         startActivity(intent);
     }
-    private void myStartActivity(Class c,PostInfo postInfo){
-        Intent intent=new Intent(this, c);  //클래스로 받는 걸로 바꿈.  <- Intent intent=new Intent(this, MainActivity.class);
-        intent.putExtra("postInfo",postInfo);
-       // intent.setFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP);   //뒤로가기 할때 깨끗하게
-        startActivity(intent);
-    }
+
 }
