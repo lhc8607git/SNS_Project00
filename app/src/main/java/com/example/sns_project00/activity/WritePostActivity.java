@@ -39,7 +39,9 @@ import static com.example.sns_project00.Util.GALLERY_IMAGE;
 import static com.example.sns_project00.Util.GALLERY_VIDEO;
 import static com.example.sns_project00.Util.INTENT_MEDIA;
 import static com.example.sns_project00.Util.INTENT_PATH;
+import static com.example.sns_project00.Util.isImageFile;
 import static com.example.sns_project00.Util.isStorageUrl;
+import static com.example.sns_project00.Util.isVideoFile;
 import static com.example.sns_project00.Util.showToast;
 import static com.example.sns_project00.Util.storageUrlToName;
 
@@ -239,6 +241,7 @@ public class WritePostActivity extends BasicActivity {
         if (title.length() > 0) {
             loaderLayout.setVisibility(View.VISIBLE);
             final ArrayList<String> contentsList = new ArrayList<>();
+            final ArrayList<String> formatList = new ArrayList<>();
             user = FirebaseAuth.getInstance().getCurrentUser();
             FirebaseStorage storage = FirebaseStorage.getInstance();
             StorageReference storageRef = storage.getReference();
@@ -254,12 +257,20 @@ public class WritePostActivity extends BasicActivity {
                     if (view instanceof EditText) { //★view가 만약에 EditText가 있으면 이게 실행이 되야된다.
                         String text = ((EditText)view).getText().toString();
                         if (text.length() > 0) {
-                            contentsList.add(text);
+                            contentsList.add(text);   //여기가 텍스트 넣는 부분
+                            formatList.add("text");
                         }
-                    } else if(!isStorageUrl(pathList.get(pathCount))){  //경로가 URL이 아닐때만 경로를 처리하도록 한다
+                    } else if(!isStorageUrl(pathList.get(pathCount))){    //경로가 URL이 아닐때만 경로를 처리하도록 한다 (URL 처리 부분)
                         String path=pathList.get(pathCount);
                         successCount++;
                         contentsList.add(path);
+                        if(isImageFile(path)){   //이미지면
+                            formatList.add("image");
+                        }else if(isVideoFile(path)){    //비디오면
+                            formatList.add("video");
+                        }else{                       //그 외는 전부 텍스트로 표시
+                            formatList.add("text");
+                        }
                         String[] pathArray =path.split("\\.");  // . 기준으로 string 배열로 반환을 해준다.그 중에 마지막 값이 확장자가 된다  (그러면 바로 아랫줄에 파일 확장자명에 맞게 잘 들어 갈 것이다.)
                         final StorageReference mountainImagesRef = storageRef.child("posts/" + documentReference.getId() + "/" + pathCount + pathArray[pathArray.length-1]);
                         try {
@@ -282,7 +293,7 @@ public class WritePostActivity extends BasicActivity {
                                             contentsList.set(index, uri.toString());
                                             if (successCount==0) {
                                                 //완료
-                                                PostInfo postInfo = new PostInfo(title, contentsList, user.getUid(),date);    //user.getUid()  = 로그인한 사용자
+                                                PostInfo postInfo = new PostInfo(title, contentsList,formatList, user.getUid(),date);    //user.getUid()  = 로그인한 사용자
                                                 storeUpload(documentReference, postInfo);
                                             }
                                         }
@@ -297,7 +308,7 @@ public class WritePostActivity extends BasicActivity {
                 }
             }
             if(successCount==0){
-                storeUpload(documentReference,  new PostInfo(title, contentsList, user.getUid(), date));    //user.getUid()  = 로그인한 사용자
+                storeUpload(documentReference,  new PostInfo(title, contentsList, formatList, user.getUid(), date));    //user.getUid()  = 로그인한 사용자
             }
 
         } else {

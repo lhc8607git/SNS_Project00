@@ -1,7 +1,6 @@
 package com.example.sns_project00.view;
 
 import android.content.Context;
-import android.graphics.Color;
 import android.util.AttributeSet;
 import android.view.LayoutInflater;
 import android.view.ViewGroup;
@@ -19,10 +18,9 @@ import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Locale;
 
-import static com.example.sns_project00.Util.isStorageUrl;
-
 public class ReadContentsView  extends LinearLayout {
     private Context context;
+    private LayoutInflater layoutInflater;
     private int moreIndex=-1;
 
 
@@ -41,7 +39,7 @@ public class ReadContentsView  extends LinearLayout {
     private void initView(){
         setLayoutParams(new ViewGroup.LayoutParams(ViewGroup.LayoutParams.MATCH_PARENT, ViewGroup.LayoutParams.WRAP_CONTENT));
         setOrientation(LinearLayout.VERTICAL);
-        LayoutInflater layoutInflater=(LayoutInflater)getContext().getSystemService(Context.LAYOUT_INFLATER_SERVICE);
+        layoutInflater=(LayoutInflater)getContext().getSystemService(Context.LAYOUT_INFLATER_SERVICE);
         layoutInflater.inflate(R.layout.view_post,this,true);  //화면 가져오는거???  (view_post.xml을 가져오는 거)
     }
 
@@ -59,6 +57,7 @@ public class ReadContentsView  extends LinearLayout {
         LinearLayout contentsLayout = findViewById(R.id.contentsLayout);
         ViewGroup.LayoutParams layoutParams = new ViewGroup.LayoutParams(ViewGroup.LayoutParams.MATCH_PARENT, ViewGroup.LayoutParams.WRAP_CONTENT);  //여기다가 컨텐츠를 넣어주면된다
         ArrayList<String> contentsList = postInfo.getContents();
+        ArrayList<String> formatsList = postInfo.getFormats();
 
 
         for (int i = 0; i < contentsList.size(); i++) {
@@ -70,21 +69,28 @@ public class ReadContentsView  extends LinearLayout {
                 break;
 
             }
+
             String contents = contentsList.get(i);
-            if (isStorageUrl(contents)) {  //1.URL인지를 검사 하는 방법 && 2.URL 경로가 맞는지 검사
-                ImageView imageView = new ImageView(context);
-                imageView.setLayoutParams(layoutParams);
-                imageView.setAdjustViewBounds(true); //사진 비율이 맞춰진다
-                imageView.setScaleType(ImageView.ScaleType.FIT_XY);
+            String formats = formatsList.get(i);
+
+            if(formats.equals("image")){
+                ImageView imageView = (ImageView)layoutInflater.inflate(R.layout.view_contents_image,this,false);  //화면 가져오는거???  (view_contents_image.xml을 가져오는 거)
+//밑에 3줄 이미 다 설정 되어 있어서 주석닮.   (view_contents_image에 설정 되어 있음)
+//                imageView.setLayoutParams(layoutParams);
+//                imageView.setAdjustViewBounds(true); //사진 비율이 맞춰진다
+//                imageView.setScaleType(ImageView.ScaleType.FIT_XY);
                 contentsLayout.addView(imageView);
                 Glide.with(this).load(contents).override(1000).thumbnail(0.1f).into(imageView); //image리사이징(외부 라이브러리)
-            } else {
-                TextView textView = new TextView(context);
-                textView.setLayoutParams(layoutParams);
+            }else if(formats.equals("video")){
+
+            }else {
+                TextView textView =(TextView)layoutInflater.inflate(R.layout.view_contents_text,this,false);  //화면 가져오는거???  (view_contents_text.xml을 가져오는 거)
+//                textView.setLayoutParams(layoutParams);    이미 설정 됨
                 textView.setText(contents);
-                textView.setTextColor(Color.rgb(0,0,0));
+//                textView.setTextColor(Color.rgb(0,0,0));    이미 설정 됨
                 contentsLayout.addView(textView);
             }
+
         }
     }
 

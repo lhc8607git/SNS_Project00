@@ -135,9 +135,10 @@ public class MainActivity extends BasicActivity {
                                 postList.clear();
                                 for (QueryDocumentSnapshot document : task.getResult()) {
                                     Log.d(TAG, document.getId() + " => " + document.getData());
-                                    postList.add(new PostInfo(
-                                            document.getData().get("title").toString(),
+                                    postList.add(new PostInfo(    //추가부분
+                                            document.getData().get("title").toString(),       //여기는 읽는 부분----------------------------------
                                             (ArrayList<String>)document.getData().get("contents"),
+                                            (ArrayList<String>)document.getData().get("formats"),
                                             document.getData().get("publisher").toString(),
                                             new Date(document.getDate("createdAt").getTime()),
                                             document.getId()));
