@@ -1,6 +1,7 @@
 package com.example.sns_project00.view;
 
 import android.content.Context;
+import android.net.Uri;
 import android.util.AttributeSet;
 import android.view.LayoutInflater;
 import android.view.ViewGroup;
@@ -13,6 +14,15 @@ import androidx.annotation.Nullable;
 import com.bumptech.glide.Glide;
 import com.example.sns_project00.PostInfo;
 import com.example.sns_project00.R;
+import com.google.android.exoplayer2.ExoPlayerFactory;
+import com.google.android.exoplayer2.SimpleExoPlayer;
+import com.google.android.exoplayer2.source.MediaSource;
+import com.google.android.exoplayer2.source.ProgressiveMediaSource;
+import com.google.android.exoplayer2.ui.PlayerView;
+import com.google.android.exoplayer2.upstream.DataSource;
+import com.google.android.exoplayer2.upstream.DefaultDataSourceFactory;
+import com.google.android.exoplayer2.util.Util;
+import com.google.android.exoplayer2.video.VideoListener;
 
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
@@ -82,7 +92,28 @@ public class ReadContentsView  extends LinearLayout {
                 contentsLayout.addView(imageView);
                 Glide.with(this).load(contents).override(1000).thumbnail(0.1f).into(imageView); //image리사이징(외부 라이브러리)
             }else if(formats.equals("video")){
+                final PlayerView playerView=(PlayerView) layoutInflater.inflate(R.layout.view_contents_player,this,false);  //화면 가져오는거???  (view_contents_image.xml을 가져오는 거)
+                SimpleExoPlayer player = ExoPlayerFactory.newSimpleInstance(context);
 
+
+                DataSource.Factory dataSourceFactory = new DefaultDataSourceFactory(context,
+                        Util.getUserAgent(context, getResources().getString(R.string.app_name)));  //이름 넣어주면 됨
+
+                MediaSource videoSource = new ProgressiveMediaSource.Factory(dataSourceFactory)
+                        .createMediaSource(Uri.parse(contents));   //Uri로 바꿔줘야한다....
+
+                player.prepare(videoSource);
+
+                player.addVideoListener(new VideoListener() {
+                    @Override
+                    public void onVideoSizeChanged(int width, int height, int unappliedRotationDegrees, float pixelWidthHeightRatio) {
+                        playerView.setLayoutParams(new LayoutParams(ViewGroup.LayoutParams.MATCH_PARENT,height));
+                    }
+                });
+
+
+                playerView.setPlayer(player);
+                contentsLayout.addView(playerView);   //레이아웃에다가 추가
             }else {
                 TextView textView =(TextView)layoutInflater.inflate(R.layout.view_contents_text,this,false);  //화면 가져오는거???  (view_contents_text.xml을 가져오는 거)
 //                textView.setLayoutParams(layoutParams);    이미 설정 됨
