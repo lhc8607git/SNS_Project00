@@ -9,7 +9,7 @@
 
 <img src="https://github.com/bumptech/glide/blob/master/static/glide_logo.png?raw=true" width="300" height="100">
 
-ExoPlayer
+ExoPlayer (동영상 사용할려고)
 
 --------------------------------------------------------------------------
 
