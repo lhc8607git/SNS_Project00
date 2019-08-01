@@ -201,22 +201,29 @@ public class WritePostActivity extends BasicActivity {
                     break;
                 case R.id.delete:
                     final View selectedView = (View)selectedImageView.getParent();
+                    String path=pathList.get(parent.indexOfChild(selectedView)-1);
 
-                    StorageReference desertRef = storageRef.child("posts/"+postInfo.getId()+"/"+storageUrlToName(pathList.get(parent.indexOfChild(selectedView)-1)));
-                    desertRef.delete().addOnSuccessListener(new OnSuccessListener<Void>() {
-                        @Override
-                        public void onSuccess(Void aVoid) {
-                            showToast(WritePostActivity.this,"파일을 삭제 하였습니다.");
-                            pathList.remove(parent.indexOfChild(selectedView)-1);//이 뷰가 parent의 몇번째에 있는 자식인지 알아온다
-                            parent.removeView(selectedView); //getParent()하면 부모뷰에 접근을 한다.
-                            buttonsBackgroundLayout.setVisibility(View.GONE);
-                        }
-                    }).addOnFailureListener(new OnFailureListener() {
-                        @Override
-                        public void onFailure(@NonNull Exception exception) {
-                            showToast(WritePostActivity.this,"파일을 삭제하는데 실패하였습니다.");
-                        }
-                    });
+                    if(isStorageUrl(path)){   //storageUrl 이면
+                        StorageReference desertRef = storageRef.child("posts/"+postInfo.getId()+"/"+storageUrlToName(path));
+                        desertRef.delete().addOnSuccessListener(new OnSuccessListener<Void>() {
+                            @Override
+                            public void onSuccess(Void aVoid) {
+                                showToast(WritePostActivity.this,"파일을 삭제 하였습니다.");
+                                pathList.remove(parent.indexOfChild(selectedView)-1);//이 뷰가 parent의 몇번째에 있는 자식인지 알아온다
+                                parent.removeView(selectedView); //getParent()하면 부모뷰에 접근을 한다.
+                                buttonsBackgroundLayout.setVisibility(View.GONE);
+                            }
+                        }).addOnFailureListener(new OnFailureListener() {
+                            @Override
+                            public void onFailure(@NonNull Exception exception) {
+                                showToast(WritePostActivity.this,"파일을 삭제하는데 실패하였습니다.");
+                            }
+                        });
+                    }else {
+                        pathList.remove(parent.indexOfChild(selectedView)-1);//이 뷰가 parent의 몇번째에 있는 자식인지 알아온다
+                        parent.removeView(selectedView); //getParent()하면 부모뷰에 접근을 한다.
+                        buttonsBackgroundLayout.setVisibility(View.GONE);
+                    }
 
                     break;
 

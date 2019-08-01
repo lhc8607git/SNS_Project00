@@ -13,7 +13,6 @@ import android.widget.RelativeLayout;
 import android.widget.Toast;
 
 import androidx.annotation.NonNull;
-import androidx.cardview.widget.CardView;
 
 import com.bumptech.glide.Glide;
 import com.example.sns_project00.MemberInfo;
@@ -42,6 +41,7 @@ public class MemberInitActivity extends BasicActivity {
     private static final String TAG = "MemberInitActivity";
     private ImageView profileImageView;
     private RelativeLayout loaderLayout;
+    private   RelativeLayout buttonBackgroundLayout;
     private String profilePath;         //경로도 전역변수로 바꿔줌.;
     private FirebaseUser user;
 
@@ -53,6 +53,9 @@ public class MemberInitActivity extends BasicActivity {
 
         loaderLayout=findViewById(R.id.loaderLayout);
         profileImageView= findViewById(R.id.profileimg);
+        buttonBackgroundLayout =findViewById(R.id.buttonsBackgroundLayout);
+
+        buttonBackgroundLayout.setOnClickListener(onClickListener);
         profileImageView.setOnClickListener(onClickListener);
 
         findViewById(R.id.btncheckINIT).setOnClickListener(onClickListener);
@@ -79,6 +82,7 @@ public class MemberInitActivity extends BasicActivity {
 //                    Bitmap bmp = BitmapFactory.decodeFile(profilePath);                 //저장된 사진의 위치가 String으로 되어 있어서 Bitmap으로 디코더파일을 해서 이미지로 바꿔준다!!!
 //                    profileImageView.setImageBitmap(bmp);
                     Glide.with(this).load(profilePath).centerCrop().override(500).into(profileImageView); //image리사이징(외부 라이브러리)
+                    buttonBackgroundLayout.setVisibility(View.GONE);
                 }
                 break;
             }
@@ -93,12 +97,10 @@ public class MemberInitActivity extends BasicActivity {
                     storageUploader();
                     break;
                 case R.id.profileimg:
-                    CardView cardView=findViewById(R.id.buttonsCardView);
-                    if(cardView.getVisibility() == View.VISIBLE){
-                        cardView.setVisibility(View.GONE);
-                    }else {
-                        cardView.setVisibility(View.VISIBLE);
-                    }
+                    buttonBackgroundLayout.setVisibility(View.VISIBLE);
+                    break;
+                case R.id.buttonsBackgroundLayout:
+                    buttonBackgroundLayout.setVisibility(View.GONE);
                     break;
                 case R.id.picture:
                     myStartActivity(CameraActivity.class);

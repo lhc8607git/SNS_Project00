@@ -22,6 +22,7 @@ import com.example.sns_project00.activity.PostActivity;
 import com.example.sns_project00.activity.WritePostActivity;
 import com.example.sns_project00.listener.OnPostListener;
 import com.example.sns_project00.view.ReadContentsView;
+import com.google.android.exoplayer2.SimpleExoPlayer;
 
 import java.util.ArrayList;
 
@@ -29,6 +30,7 @@ public class MainAdapter extends RecyclerView.Adapter<MainAdapter.MainViewHolder
     private ArrayList<PostInfo> mDataset;
     private Activity activity;
     private FirebaseHelper firebaseHelper;
+    private ArrayList<ArrayList<SimpleExoPlayer>> playerArrayListArrayList = new ArrayList<>();
     private final int MORE_INDEX=2;  //나중에 더보기 더 늘리고 싶으면 여기서 바꿔주면 됨-----------------------------------
 
     static class MainViewHolder extends RecyclerView.ViewHolder {
@@ -105,6 +107,12 @@ public class MainAdapter extends RecyclerView.Adapter<MainAdapter.MainViewHolder
 
             readContentsView.setMoreIndex(MORE_INDEX);
             readContentsView.setPostInfo(postInfo);
+
+
+            ArrayList<SimpleExoPlayer> playerArrayList=readContentsView.getPlayerArrayList();
+            if(playerArrayList != null){
+                playerArrayListArrayList.add(playerArrayList);
+            }
         }
     }
 
@@ -143,5 +151,18 @@ public class MainAdapter extends RecyclerView.Adapter<MainAdapter.MainViewHolder
         // intent.setFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP);   //뒤로가기 할때 깨끗하게
         activity.startActivity(intent);
     }
+
+    public void playerStop(){
+        for(int i=0; i<playerArrayListArrayList.size();i++){
+            ArrayList<SimpleExoPlayer> playerArrayList=playerArrayListArrayList.get(i);
+            for(int ii=0; ii<playerArrayList.size();ii++){
+                SimpleExoPlayer player=playerArrayList.get(ii);
+                if(player.getPlayWhenReady()){
+                    player.setPlayWhenReady(false);
+                }
+            }
+        }
+    }
+
 
 }

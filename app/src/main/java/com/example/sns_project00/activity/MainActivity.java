@@ -34,7 +34,8 @@ public class MainActivity extends BasicActivity {
     private FirebaseFirestore firebaseFirestore;
     private MainAdapter mainAdapter;
     private  ArrayList<PostInfo> postList;
-
+    private boolean updating;
+    private boolean topScrolled; //스크롤이 시작했을 때부터 끝 날때까지 쳌크하는거
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -85,12 +86,75 @@ public class MainActivity extends BasicActivity {
         recyclerView.setHasFixedSize(true);
         recyclerView.setLayoutManager(new LinearLayoutManager(MainActivity.this));
         recyclerView.setAdapter(mainAdapter);
+        recyclerView.addOnScrollListener(new RecyclerView.OnScrollListener() {
+            @Override
+            public void onScrollStateChanged(@NonNull RecyclerView recyclerView, int newState) {            // 스크롤 상태가 변했을 때 (그냥 스크롤 슉해도 인식을 받는 녀석)
+                super.onScrollStateChanged(recyclerView, newState);
+
+                RecyclerView.LayoutManager layoutManager =recyclerView.getLayoutManager();
+                int firstVisibleItemPosition =((LinearLayoutManager)layoutManager).findFirstVisibleItemPosition();  //화면에 보이는 첫번째
+
+                if(newState == 1 && firstVisibleItemPosition == 0){
+                    topScrolled=true;
+                }
+                if (newState==0 && topScrolled){  //손가락을 땠을 때
+                    postList.clear();
+                    PostUpdate();
+
+                    topScrolled=false;
+
+                }
+            }
+            @Override
+            public void onScrolled(RecyclerView recyclerView, int dx, int dy){  //그냥 스크롤이 되는 네네 작동하는거
+                super.onScrolled(recyclerView, dx, dy);
+
+                //스코릴이 될때마다 화면에 보이는 아이템이 몇번째 인지 알 수 있는 방법
+                RecyclerView.LayoutManager layoutManager =recyclerView.getLayoutManager();
+                int visibleItemCount = layoutManager.getChildCount();
+                int totalItemCount =layoutManager.getItemCount();
+                int firstVisibleItemPosition =((LinearLayoutManager)layoutManager).findFirstVisibleItemPosition();  //화면에 보이는 첫번째
+                int lastVisibleItemPosition = ((LinearLayoutManager)layoutManager).findLastVisibleItemPosition();  //화면에 보이는 마지막째
+
+                if(totalItemCount -3 <= lastVisibleItemPosition && !updating){
+                    PostUpdate();
+                }
+
+                if(0 < firstVisibleItemPosition){
+                    topScrolled=false;
+                }
+
+            }
+        });
+
+
+        PostUpdate(); //게시물 읽어오는고 업데이트 등등
+
+ 
     }
 
     @Override
     protected void onResume(){  //(액티비티가 재실행 되거나, 다시 왔을 때) 이것을 사용한다.
         super.onResume();
-        PostUpdate();
+       // PostUpdate();  포스트 업데이트하는거거
+    }
+
+    @Override
+    protected void onPause() { //액티비티가 멈춰질떄 나타내는거
+        super.onPause();
+        mainAdapter.playerStop();
+    }
+
+    @Override       //일딴 ,,,,,,,,, 값을 확인하는곳?  받는 곳?
+    public void onActivityResult(int requestCode, int resultCode, Intent data) {
+        super.onActivityResult(requestCode, resultCode, data);
+        switch (requestCode) {
+            case 0:
+                if(data != null){
+                    PostUpdate();
+                }
+                break;
+        }
     }
 
 
@@ -100,7 +164,7 @@ public class MainActivity extends BasicActivity {
             switch (v.getId()){
                 /*
                 case R.id.btnmainlogout:
-                    FirebaseAuth.getInstance().signOut();   //★ Firebase Auth 로그아웃 하는 방법
+                    FirebaseAuth.getInstance().signOut();   //★ Firebase Auth 로그아웃 하는 방법  (로그아웃, 로그아웃로그아웃, 로그아웃로그아웃, 로그아웃로그아웃, 로그아웃)
                     myStartActivity(SignUpActivity.class);
                     break;
                 */
@@ -113,8 +177,10 @@ public class MainActivity extends BasicActivity {
 
     OnPostListener onPostListener=new OnPostListener() {
         @Override
-        public void onDelete() {
-            PostUpdate();
+        public void onDelete(PostInfo postInfo) {
+            postList.remove(postInfo);
+            mainAdapter.notifyDataSetChanged();
+
             Log.e("로그 : ","삭제 성공");
         }
 
@@ -124,15 +190,18 @@ public class MainActivity extends BasicActivity {
         }
     };
 
+
+
     private void PostUpdate(){
         if(firebaseUser!=null){
+            updating =true;
+            Date date = postList.size() ==0 ? new Date() : postList.get(postList.size() -1).getCreatedAt();
             CollectionReference collectionReference=firebaseFirestore.collection("posts");
-            collectionReference.orderBy("createdAt", Query.Direction.DESCENDING).get()
+            collectionReference.orderBy("createdAt", Query.Direction.DESCENDING).whereLessThan("createdAt",date).limit(10).get()     //limit 10개씩 일거오는거
                     .addOnCompleteListener(new OnCompleteListener<QuerySnapshot>() {
                         @Override
                         public void onComplete(@NonNull Task<QuerySnapshot> task) {
                             if (task.isSuccessful()) {
-                                postList.clear();
                                 for (QueryDocumentSnapshot document : task.getResult()) {
                                     Log.d(TAG, document.getId() + " => " + document.getData());
                                     postList.add(new PostInfo(    //추가부분
@@ -148,6 +217,7 @@ public class MainActivity extends BasicActivity {
                             } else {
                                 Log.d(TAG, "Error getting documents: ", task.getException());
                             }
+                            updating=false;
                         }
                     });
         }
@@ -157,7 +227,7 @@ public class MainActivity extends BasicActivity {
     private void myStartActivity(Class c){
         Intent intent=new Intent(this, c);  //클래스로 받는 걸로 바꿈.  <- Intent intent=new Intent(this, MainActivity.class);
         intent.setFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP);   //뒤로가기 할때 깨끗하게
-        startActivity(intent);
+        startActivityForResult(intent,0);
     }
 
 }

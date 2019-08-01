@@ -31,6 +31,7 @@ import java.util.Locale;
 public class ReadContentsView  extends LinearLayout {
     private Context context;
     private LayoutInflater layoutInflater;
+    private ArrayList<SimpleExoPlayer> playerArrayList=new ArrayList<>();
     private int moreIndex=-1;
 
 
@@ -46,11 +47,12 @@ public class ReadContentsView  extends LinearLayout {
         initView();
     }
 
-    private void initView(){
+    private void initView(){  //초기화
         setLayoutParams(new ViewGroup.LayoutParams(ViewGroup.LayoutParams.MATCH_PARENT, ViewGroup.LayoutParams.WRAP_CONTENT));
         setOrientation(LinearLayout.VERTICAL);
         layoutInflater=(LayoutInflater)getContext().getSystemService(Context.LAYOUT_INFLATER_SERVICE);
         layoutInflater.inflate(R.layout.view_post,this,true);  //화면 가져오는거???  (view_post.xml을 가져오는 거)
+
     }
 
     public void setMoreIndex(int moreIndex){
@@ -93,16 +95,15 @@ public class ReadContentsView  extends LinearLayout {
                 Glide.with(this).load(contents).override(1000).thumbnail(0.1f).into(imageView); //image리사이징(외부 라이브러리)
             }else if(formats.equals("video")){
                 final PlayerView playerView=(PlayerView) layoutInflater.inflate(R.layout.view_contents_player,this,false);  //화면 가져오는거???  (view_contents_image.xml을 가져오는 거)
-                SimpleExoPlayer player = ExoPlayerFactory.newSimpleInstance(context);
-
 
                 DataSource.Factory dataSourceFactory = new DefaultDataSourceFactory(context,
                         Util.getUserAgent(context, getResources().getString(R.string.app_name)));  //이름 넣어주면 됨
-
                 MediaSource videoSource = new ProgressiveMediaSource.Factory(dataSourceFactory)
                         .createMediaSource(Uri.parse(contents));   //Uri로 바꿔줘야한다....
 
-                player.prepare(videoSource);
+                SimpleExoPlayer player= ExoPlayerFactory.newSimpleInstance(context); //★player가 필요할 때마다 생성하게 해줘야 한다..(안해주면... 동영상 한 개만 실행됨..그래서 각각각..)
+
+                player.prepare(videoSource);  //영상처리해주는 곳
 
                 player.addVideoListener(new VideoListener() {
                     @Override
@@ -111,6 +112,7 @@ public class ReadContentsView  extends LinearLayout {
                     }
                 });
 
+                playerArrayList.add(player);// 다만 들어준 player를 playerArrayList에다가 넣는다.
 
                 playerView.setPlayer(player);
                 contentsLayout.addView(playerView);   //레이아웃에다가 추가
@@ -123,6 +125,10 @@ public class ReadContentsView  extends LinearLayout {
             }
 
         }
+    }
+
+    public ArrayList<SimpleExoPlayer> getPlayerArrayList(){  //언제든지 playerlist를 가져와서 정지를 시켜줄려고. 일딴 만듬
+        return playerArrayList;
     }
 
 }
