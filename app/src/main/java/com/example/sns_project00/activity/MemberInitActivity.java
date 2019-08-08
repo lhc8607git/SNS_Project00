@@ -15,7 +15,7 @@ import android.widget.Toast;
 import androidx.annotation.NonNull;
 
 import com.bumptech.glide.Glide;
-import com.example.sns_project00.MemberInfo;
+import com.example.sns_project00.UserInfo;
 import com.example.sns_project00.R;
 import com.google.android.gms.tasks.Continuation;
 import com.google.android.gms.tasks.OnCompleteListener;
@@ -48,7 +48,7 @@ public class MemberInitActivity extends BasicActivity {
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-        setContentView(R.layout.activity_member_init);
+        setContentView(R.layout.activity_user_init);
         setToolbarTitle("회원정보"); //액션바 이름
 
         loaderLayout=findViewById(R.id.loaderLayout);
@@ -129,8 +129,8 @@ public class MemberInitActivity extends BasicActivity {
             final StorageReference mountainImagesRef = storageRef.child("users/"+user.getUid()+"/profileImage.jpg");   //★★사용자의 Uid 가져와서 각각 넣음(구별)★★
 
             if(profilePath == null){
-                MemberInfo memberInfo = new MemberInfo(name,phonenum,birthday,address);
-                storeUploader(memberInfo);
+                UserInfo userInfo = new UserInfo(name,phonenum,birthday,address);
+                storeUploader(userInfo);
             }else{
                 try{
                     InputStream stream = new FileInputStream(new File(profilePath));
@@ -150,8 +150,8 @@ public class MemberInitActivity extends BasicActivity {
                                 Uri downloadUri = task.getResult();
                                 Log.e("성공","성공 : "+downloadUri);
 
-                                MemberInfo memberInfo = new MemberInfo(name,phonenum,birthday,address,downloadUri.toString());
-                                storeUploader(memberInfo);
+                                UserInfo userInfo = new UserInfo(name,phonenum,birthday,address,downloadUri.toString());
+                                storeUploader(userInfo);
                             } else {
 
                                 showToast(MemberInitActivity.this,"회원정보를 보내는데 실패하였습니다.");
@@ -170,9 +170,9 @@ public class MemberInitActivity extends BasicActivity {
         }
     }
 
-    private void storeUploader(MemberInfo memberInfo){
+    private void storeUploader(UserInfo userInfo){
         FirebaseFirestore db = FirebaseFirestore.getInstance(); //firestore 초기화
-        db.collection("users").document(user.getUid()).set(memberInfo)
+        db.collection("users").document(user.getUid()).set(userInfo)
                 .addOnSuccessListener(new OnSuccessListener<Void>() {          //성공 했을때 - 토스트로 알려주고 싶어서서
                     @Override
                     public void onSuccess(Void aVoid) {
