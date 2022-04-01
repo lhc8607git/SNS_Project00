@@ -44,17 +44,17 @@
 < Authentication를 사용한 비밀번호 재설정 > 
 |1) 재설정할 이메일 입력|2) 해당 이메일로 변경메일 발송 후, 변경|
 |---|---|
-|![img1](https://user-images.githubusercontent.com/39355400/161195591-794bb3cb-bbc2-423c-9ec0-8efcf6def735.PNG)|![img2](https://user-images.githubusercontent.com/39355400/161195628-d5b8a5b6-d21d-4667-828c-3f234d98671f.PNG)|
+|![img12](https://user-images.githubusercontent.com/39355400/161269580-db13df6f-70ba-4893-9c97-2308611f49c5.PNG)|![img13](https://user-images.githubusercontent.com/39355400/161269582-96e3f967-3bfe-4f1f-9771-53aad457421d.PNG)|
 
 < Cloud Firestore를 사용한 게시글, 회원정보 데이터 관리 >
 ||
 |---|
-|![img1](https://user-images.githubusercontent.com/39355400/161195591-794bb3cb-bbc2-423c-9ec0-8efcf6def735.PNG)|
+|![img14](https://user-images.githubusercontent.com/39355400/161269586-baf78b27-6f04-4110-9de0-54dd7129785e.PNG)|
 
 < Storage를 이용한 이미지, 동영상 데이터 관리 >
 ||
 |---|
-|![img1](https://user-images.githubusercontent.com/39355400/161195591-794bb3cb-bbc2-423c-9ec0-8efcf6def735.PNG)|  
+|![img15](https://user-images.githubusercontent.com/39355400/161269589-16b38270-4ae6-4e44-b02d-4f5610244b12.PNG)|  
 </details>
 
 
