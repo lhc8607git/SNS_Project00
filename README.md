@@ -16,6 +16,9 @@
 ## 😁 인원
 - 1명
 
+## 🔨 Language
+- Java
+
 ## 🛠 Tool
 - IDE [Android Studio], Server [Firebase]
 
